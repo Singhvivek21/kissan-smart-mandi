@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" class="admin-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slot Management | KISSAN – Officer Console</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-page">
+
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    🔬 <strong>OFFICER CONSOLE</strong> — SMS: Simulated (Mock Mode) &nbsp;|&nbsp; Data: Local Server &nbsp;|&nbsp; SIH 2026 Demo
+  </div>
+
+  <!-- Admin Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🎛️</div>
+        <div>KISSAN <span class="brand-tagline">Officer Console</span></div>
+      </a>
+
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="admin-dashboard.html">Dashboard</a></li>
+        <li><a href="admin-slots.html" class="active">Slots</a></li>
+        <li><a href="admin-queue.html">Queue</a></li>
+        <li><a href="admin-procurement.html">Weighment</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm" id="adminAvatarLetter">A</div>
+          <span id="adminNameDisplay">Officer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 3rem;">
+
+      <!-- Page Header -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 style="font-size: 1.6rem; font-weight: 800;">Slot & Centre Management</h1>
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.2rem;">
+            Manage procurement centres and create arrival time windows for farmers.
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-open-scanner">📷 Scan QR</button>
+          <a href="admin-dashboard.html" class="btn btn-primary">← Dashboard</a>
+        </div>
+      </div>
+
+      <!-- 1. Procurement Centres -->
+      <div class="card mb-6" style="border-top: 3px solid var(--green);" id="centresSection">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">🏛️ Procurement Centres</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">Add and manage grain collection hubs.</p>
+          </div>
+          <span class="badge badge-success" id="centresCountBadge">3 Centres</span>
+        </div>
+
+        <!-- Add Centre Form -->
+        <form id="addCentreForm" style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.85rem; font-weight: 700;">Add New Centre</h3>
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label class="form-label" for="centreNameInput">Centre Name <span class="required">*</span></label>
+              <input type="text" id="centreNameInput" class="form-control" placeholder="e.g. Krishi Upaj Mandi - Sector 7" required>
+            </div>
+            <div class="form-group" style="flex: 1.5;">
+              <label class="form-label" for="centreLocationInput">Location <span class="required">*</span></label>
+              <input type="text" id="centreLocationInput" class="form-control" placeholder="e.g. Karnal, Haryana" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label class="form-label" for="centreAddressInput">Address <span class="required">*</span></label>
+              <input type="text" id="centreAddressInput" class="form-control" placeholder="e.g. GT Road, Near Grain Yard, Sector 7" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="centreCapacityInput">Daily Capacity <span class="required">*</span></label>
+              <input type="number" id="centreCapacityInput" class="form-control" placeholder="e.g. 60" value="50" min="1" max="500" required>
+            </div>
+            <div class="form-group" style="flex: 0.8; display: flex; align-items: flex-end;">
+              <button type="submit" id="btnAddCentreSubmit" class="btn btn-primary btn-block">Add Centre</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Centres Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Centre Name</th>
+                <th>Location</th>
+                <th>Capacity</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="procurementCentresTableBody">
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                  <div class="spinner" style="margin: 0 auto 0.5rem;"></div>
+                  Loading centres...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. Procurement Slots -->
+      <div class="card mb-6" style="border-top: 3px solid var(--amber);" id="slotsSection">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">📅 Procurement Slots</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">Create arrival time windows for farmers to book.</p>
+          </div>
+          <span class="badge badge-info" id="slotsCountBadge">Slots</span>
+        </div>
+
+        <!-- Add Slot Form -->
+        <form id="addSlotForm" style="background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem;">
+          <h3 style="font-size: 0.95rem; margin-bottom: 0.85rem; font-weight: 700;">Create New Slot</h3>
+          <div class="form-row">
+            <div class="form-group" style="flex: 2;">
+              <label class="form-label" for="slotCentreSelect">Centre <span class="required">*</span></label>
+              <select id="slotCentreSelect" class="form-control" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1.5;">
+              <label class="form-label" for="slotDateInput">Date <span class="required">*</span></label>
+              <input type="date" id="slotDateInput" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="slotStartTimeInput">Start Time <span class="required">*</span></label>
+              <input type="time" id="slotStartTimeInput" class="form-control" value="08:00" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="slotEndTimeInput">End Time <span class="required">*</span></label>
+              <input type="time" id="slotEndTimeInput" class="form-control" value="11:00" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="slotCapacityInput">Capacity <span class="required">*</span></label>
+              <input type="number" id="slotCapacityInput" class="form-control" value="25" min="1" max="500" required>
+            </div>
+            <div class="form-group" style="flex: 1; display: flex; align-items: flex-end;">
+              <button type="submit" id="btnAddSlotSubmit" class="btn btn-accent btn-block">Create Slot</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Slots Table -->
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Centre</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Capacity</th>
+                <th>Booked</th>
+                <th>Available</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminSlotsTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                  <div class="spinner" style="margin: 0 auto 0.5rem;"></div>
+                  Loading slots...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. Bookings Verification -->
+      <div class="card">
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h2 class="card-title" style="font-size: 1rem;">📋 Slot Bookings Verification</h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">Filter and verify incoming farmer bookings.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex: 1; max-width: 420px;">
+            <input
+              type="text"
+              id="slotSearchInput"
+              class="form-control"
+              placeholder="Search farmer, token, or crop..."
+            >
+            <button class="btn btn-secondary btn-open-scanner" style="white-space: nowrap;">📷 Scan</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Farmer</th>
+                <th>Crop</th>
+                <th>Date &amp; Time</th>
+                <th>Vehicle</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminBookingsTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                  <div class="spinner" style="margin: 0 auto 0.5rem;"></div>
+                  Loading bookings...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- QR Scanner Modal -->
+  <div class="modal-overlay" id="gateScannerModal">
+    <div class="modal-dialog" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="margin: 0;">📷 Scan Farmer Gate Pass</h3>
+        <button onclick="closeGateQrScanner()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; text-align: center;">
+          Point camera at the farmer's gate pass QR code.
+        </p>
+
+        <div id="qrReaderView" style="width: 100%; max-width: 300px; min-height: 220px; margin: 0 auto 1rem; border-radius: var(--radius-lg); overflow: hidden; background: #0f172a; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.875rem;">
+          Camera not available
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 0.85rem;">
+          <label class="form-label" style="font-size: 0.82rem;">Or enter token manually:</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="manualTokenInput" class="form-control" placeholder="e.g. KSM-042" style="text-transform: uppercase;">
+            <button onclick="handleManualQrSearch()" class="btn btn-primary" style="white-space: nowrap;">Verify</button>
+          </div>
+        </div>
+
+        <div id="scannedFarmerResult" style="display: none; margin-top: 1rem;">
+          <!-- Populated by admin.js -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button onclick="closeGateQrScanner()" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Officer Console &nbsp;|&nbsp; <span class="badge badge-demo">DEMO MODE</span></p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/qrcode-lib.js"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script src="js/admin.js?v=20260919"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+  </script>
+</body>
+</html>

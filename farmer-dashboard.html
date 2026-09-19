@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class="farmer-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | KISSAN – Procure Smart Mandi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="farmer-page">
+
+  <!-- Top Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="farmer-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🌾</div>
+        <div>KISSAN <span class="brand-tagline">Farmer Portal</span></div>
+      </a>
+
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="farmer-dashboard.html" class="active">Home</a></li>
+        <li><a href="book-slot.html">Book Slot</a></li>
+        <li><a href="my-booking.html">My Booking</a></li>
+        <li><a href="queue.html">Queue</a></li>
+        <li><a href="procurement.html">Procurement</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="notification-nav-wrapper">
+          <button class="notification-bell-btn" id="notifBellBtn" aria-label="Notifications">
+            🔔 <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+          </button>
+          <div class="notification-dropdown" id="notifDropdown">
+            <div class="notif-dropdown-header">
+              <span>Notifications</span>
+              <button onclick="markAllNotificationsAsRead()" class="btn btn-sm btn-ghost" style="font-size:0.75rem; padding:0.2rem 0.5rem;">Mark all read</button>
+            </div>
+            <div class="notif-dropdown-body" id="notifDropdownBody">
+              <div style="padding:1rem; text-align:center; font-size:0.875rem; color:var(--text-muted);">Loading...</div>
+            </div>
+            <div class="notif-dropdown-footer">
+              <a href="#farmerNotificationsCard" onclick="document.getElementById('notifDropdown').classList.remove('active')">View all notifications</a>
+            </div>
+          </div>
+        </div>
+        <div class="user-chip">
+          <div class="user-avatar-sm" id="farmerAvatarLetter">F</div>
+          <span id="farmerNameDisplay">Farmer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 3rem;">
+
+      <!-- Greeting Row -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 id="farmerGreeting" style="font-size: 1.5rem; font-weight: 800;">Good morning 👋</h1>
+          <p id="farmerMeta" style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.2rem;"></p>
+        </div>
+        <a href="book-slot.html" class="btn btn-primary">+ Book a Slot</a>
+      </div>
+
+      <!-- ACTIVE BOOKING HERO (injected by farmer.js) -->
+      <div id="activeTokenBanner" style="margin-bottom: 1.75rem;"></div>
+
+      <!-- JOURNEY PROGRESS -->
+      <div class="card mb-6" id="journeyProgressCard">
+        <div class="card-header" style="margin-bottom: 0.75rem;">
+          <span class="card-title">Your Mandi Journey</span>
+          <span class="badge badge-info" id="journeyStatusBadge">–</span>
+        </div>
+        <div class="journey-timeline" id="farmerJourneyTimeline">
+          <!-- Stages rendered by farmer.js or static fallback -->
+          <div class="journey-stage done">
+            <div class="journey-dot">✓</div>
+            <div class="journey-label">Registered</div>
+          </div>
+          <div class="journey-stage" id="jStageBooked">
+            <div class="journey-dot">📅</div>
+            <div class="journey-label">Slot Booked</div>
+          </div>
+          <div class="journey-stage" id="jStageToken">
+            <div class="journey-dot">🎫</div>
+            <div class="journey-label">Token Given</div>
+          </div>
+          <div class="journey-stage" id="jStageQueue">
+            <div class="journey-dot">📍</div>
+            <div class="journey-label">In Queue</div>
+          </div>
+          <div class="journey-stage" id="jStageProcure">
+            <div class="journey-dot">⚖️</div>
+            <div class="journey-label">Procurement</div>
+          </div>
+          <div class="journey-stage" id="jStagePayment">
+            <div class="journey-dot">💰</div>
+            <div class="journey-label">Payment</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-grid mb-6" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+        <div class="stat-card">
+          <div class="stat-icon green">📅</div>
+          <div id="statActiveBookings" class="stat-value">–</div>
+          <div class="stat-label">Active Slots</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div id="statCompletedProcurements" class="stat-value">–</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">💰</div>
+          <div id="statTotalPayout" class="stat-value">–</div>
+          <div class="stat-label">Total Payout</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">🔔</div>
+          <div id="statUnreadNotifications" class="stat-value">–</div>
+          <div class="stat-label">Unread</div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <span class="card-title">Quick Actions</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem;">
+          <a href="book-slot.html" class="btn btn-primary" style="flex-direction:column; height:72px; gap:0.35rem;">
+            <span style="font-size:1.3rem;">📅</span>
+            <span style="font-size:0.78rem;">Book Slot</span>
+          </a>
+          <a href="queue.html" class="btn btn-secondary" style="flex-direction:column; height:72px; gap:0.35rem;">
+            <span style="font-size:1.3rem;">📍</span>
+            <span style="font-size:0.78rem;">Live Queue</span>
+          </a>
+          <a href="my-booking.html" class="btn btn-secondary" style="flex-direction:column; height:72px; gap:0.35rem;">
+            <span style="font-size:1.3rem;">🎫</span>
+            <span style="font-size:0.78rem;">My Booking</span>
+          </a>
+          <a href="procurement.html" class="btn btn-secondary" style="flex-direction:column; height:72px; gap:0.35rem;">
+            <span style="font-size:1.3rem;">⚖️</span>
+            <span style="font-size:0.78rem;">Procurement</span>
+          </a>
+          <button type="button" id="btnOpenAiAssistant" class="btn btn-secondary" style="flex-direction:column; height:72px; gap:0.35rem;">
+            <span style="font-size:1.3rem;">🤖</span>
+            <span style="font-size:0.78rem;">AI Saathi</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KISSAN AI ASSISTANT CARD -->
+      <div class="card mb-6 ai-card-inline" id="kissanAiCard">
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <h2 class="card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+              🤖 KISSAN Saathi
+              <span class="badge badge-demo" id="aiProviderBadge" style="font-size:0.65rem;">⚡ Gemini AI</span>
+            </h2>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem;">
+              Ask anything — बुकिंग, कतार, भुगतान, MSP rates, documents
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <select id="aiVoiceLangSelect" class="form-control" style="font-size: 0.8rem; padding: 0.35rem 0.65rem; width: auto; min-height: 36px;">
+              <option value="en-IN">🇬🇧 English</option>
+              <option value="hi-IN" selected>🇮🇳 हिन्दी</option>
+              <option value="pa-IN">🇮🇳 ਪੰਜਾਬੀ</option>
+            </select>
+            <button type="button" id="btnClearAiChat" class="btn btn-secondary btn-sm" title="Clear chat">🗑️</button>
+          </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="aiChatMessages" style="height: 260px; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; background-color: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 0.75rem;">
+          <div class="ai-message ai-message-assistant">
+            <div class="ai-message-bubble">
+              🙏 नमस्ते! मैं <strong>KISSAN Saathi</strong> हूँ — आपका मंडी AI सहायक।<br><br>
+              बोलकर 🎙️ या लिखकर पूछें: बुकिंग, कतार की स्थिति, MSP दरें, भुगतान, या कोई भी सवाल।<br><br>
+              <em>Ask in Hindi, English, or Punjabi — I understand all.</em>
+            </div>
+            <span class="ai-message-time">Just now</span>
+          </div>
+        </div>
+
+        <!-- Voice Status Banner -->
+        <div id="voiceStatusIndicator" class="voice-status-indicator" style="display: none;">
+          <span>🎙️</span>
+          <span id="voiceStatusText">Listening... Speak now</span>
+        </div>
+
+        <!-- Speaking Banner -->
+        <div id="voiceSpeakingBanner" style="display: none; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.4rem 0.85rem; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: var(--radius);">
+          <span class="voice-speaking-indicator">🔊 Speaking response...</span>
+          <button type="button" id="btnStopSpeaking" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">⏹️ Stop</button>
+        </div>
+
+        <!-- Loading -->
+        <div id="aiChatLoading" class="ai-chat-loading" style="display: none;">
+          ⏳ Fetching your mandi records via Gemini AI...
+        </div>
+
+        <!-- Suggested Questions -->
+        <div class="ai-suggested-wrap">
+          <div class="ai-suggested-title">Try asking:</div>
+          <div class="ai-suggested-questions">
+            <button type="button" class="ai-suggested-btn" data-question="मेरी बुकिंग की क्या स्थिति है?">मेरी बुकिंग</button>
+            <button type="button" class="ai-suggested-btn" data-question="मंडी कतार में मेरा क्या नंबर है?">Queue Status</button>
+            <button type="button" class="ai-suggested-btn" data-question="मेरा भुगतान कब तक आएगा?">Payment DBT</button>
+            <button type="button" class="ai-suggested-btn" data-question="गेहूं और सरसों का सरकारी MSP क्या है?">MSP Rates</button>
+            <button type="button" class="ai-suggested-btn" data-question="मंडी गेट पर कौन-कौन से दस्तावेज चाहिए?">Documents</button>
+          </div>
+        </div>
+
+        <!-- Input Row -->
+        <form id="aiChatForm" class="ai-chat-form">
+          <button type="button" id="btnVoiceMic" class="btn btn-secondary voice-mic-btn" title="Click to speak" style="padding: 0.55rem 0.9rem; font-size: 1.1rem; flex-shrink: 0;">🎙️</button>
+          <input type="text" id="aiChatInput" class="form-control ai-chat-input" placeholder="Type or speak your question..." autocomplete="off" required style="border-radius: var(--radius-full);">
+          <button type="submit" id="btnSendAiChat" class="btn btn-primary ai-chat-send-btn" style="border-radius: var(--radius-full);">Send</button>
+        </form>
+      </div>
+
+      <!-- TWO COLUMN: Bookings + Notifications -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; align-items: start;">
+
+        <!-- Recent Bookings -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Bookings</span>
+            <a href="my-booking.html" class="btn btn-secondary btn-sm">View All →</a>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table card-table-mobile">
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Crop</th>
+                  <th>Qty</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="recentBookingsTableBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                    <div class="spinner" style="margin: 0 auto 0.5rem;"></div>
+                    Loading bookings...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Notifications Panel -->
+        <div class="card" id="farmerNotificationsCard">
+          <div class="card-header">
+            <span class="card-title">🔔 Notifications</span>
+            <span id="unreadNotifCountBadge" class="badge badge-warning" style="display:none;"></span>
+          </div>
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+            <button onclick="markAllNotificationsAsRead()" class="btn btn-secondary btn-sm">Mark All Read</button>
+          </div>
+          <div id="farmerNotificationsList">
+            <div style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.875rem;">
+              <div class="spinner" style="margin: 0 auto 0.5rem;"></div>
+              Loading notifications...
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- BOTTOM NAVIGATION (Mobile) -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <div class="bottom-nav-inner">
+      <a href="farmer-dashboard.html" class="bottom-nav-item active">
+        <span class="bottom-nav-icon">🏠</span>
+        <span>Home</span>
+      </a>
+      <a href="book-slot.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📅</span>
+        <span>Book</span>
+      </a>
+      <button id="bottomNavAiBtn" class="bottom-nav-item ai-btn">
+        <span class="bottom-nav-icon">🤖</span>
+        <span>Saathi</span>
+      </button>
+      <a href="queue.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📍</span>
+        <span>Queue</span>
+      </a>
+      <a href="procurement.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">💰</span>
+        <span>Pay</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Procure Smart Mandi &nbsp;|&nbsp; <span class="badge badge-demo">DEMO MODE</span></p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/qrcode-lib.js"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script src="js/notifications.js?v=20260919"></script>
+  <script src="js/sms-client.js?v=20260919"></script>
+  <script src="js/farmer.js?v=20260919"></script>
+  <script src="js/ai-assistant.js?v=20260919"></script>
+  <script>
+    // Mobile menu
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // Notification dropdown
+    const notifBtn = document.getElementById('notifBellBtn');
+    const notifDrop = document.getElementById('notifDropdown');
+    notifBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notifDrop.classList.toggle('active');
+    });
+    document.addEventListener('click', () => notifDrop?.classList.remove('active'));
+
+    // Bottom nav AI button
+    document.getElementById('bottomNavAiBtn')?.addEventListener('click', () => {
+      document.getElementById('kissanAiCard')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // AI assistant open button
+    document.getElementById('btnOpenAiAssistant')?.addEventListener('click', () => {
+      document.getElementById('kissanAiCard')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Dynamic greeting
+    const hour = new Date().getHours();
+    const greetEl = document.getElementById('farmerGreeting');
+    if (greetEl) {
+      const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+      // farmer.js will replace with actual name
+    }
+  </script>
+</body>
+</html>

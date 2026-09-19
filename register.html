@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" class="farmer-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Registration | KISSAN – Procure Smart Mandi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="farmer-page">
+
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    🔬 <strong>DEMO MODE</strong> — Hackathon Build · Pre-filled Demo Details for Fast Testing
+  </div>
+
+  <!-- Navigation -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon">🌾</div>
+        <div>KISSAN <span class="brand-tagline">Farmer Portal</span></div>
+      </a>
+
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="queue.html">Live Queue</a></li>
+        <li><a href="login.html">Farmer Login</a></li>
+        <li><a href="register.html" class="active">Register</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="admin-login.html" class="btn btn-secondary btn-sm">Officer Console</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding: 2.5rem 0;">
+    <div class="container">
+      <div class="auth-split-container" style="max-width: 980px;">
+
+        <!-- Left Hero Side -->
+        <div class="auth-hero-side">
+          <img src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80" alt="Indian Agriculture" class="auth-hero-bg">
+          <div class="auth-hero-content">
+            <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.2px; color: #bbf7d0; font-weight: 700; margin-bottom: 0.5rem;">
+              Digital India · Agriculture Modernization
+            </div>
+            <h2 style="color: #fff; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.6rem; line-height: 1.3;">
+              Register once.<br>Access all APMC Mandis across India.
+            </h2>
+            <p style="color: #f0fdf4; font-size: 0.875rem; line-height: 1.6;">
+              Schedule your arrival windows in advance, get instant digital gate tokens, track live weighment queue status, and receive DBT payment updates directly on your phone.
+            </p>
+            <div style="margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; color: #bbf7d0;">
+              <div>✓ Guaranteed MSP rates</div>
+              <div>✓ Zero-wait digital gate entry tokens</div>
+              <div>✓ SMS and app notifications at every stage</div>
+              <div>✓ Form J digital procurement certificate</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Registration Form -->
+        <div class="auth-form-side">
+          <div style="margin-bottom: 1.25rem;">
+            <h1 style="font-size: 1.4rem; font-weight: 800;">Create Farmer Account</h1>
+            <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.25rem;">
+              Fill in your details to register as a farmer.
+            </p>
+          </div>
+
+          <form id="farmerRegisterForm" onsubmit="handleFarmerRegistration(event); return false;">
+            <!-- Name & Mobile -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regFullName">Full Name <span class="required">*</span></label>
+                <input type="text" id="regFullName" class="form-control" placeholder="e.g. Rameshwar Singh" value="Rameshwar Singh" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="regMobile">Mobile Number <span class="required">*</span></label>
+                <input type="tel" id="regMobile" class="form-control" placeholder="10-digit number" value="9876543210" maxlength="10" required>
+              </div>
+            </div>
+
+            <!-- Email & Password -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regEmail">Email Address <span class="required">*</span></label>
+                <input type="email" id="regEmail" class="form-control" placeholder="farmer@example.com" value="farmer@gmail.com" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="regPassword">Password <span class="required">*</span></label>
+                <input type="password" id="regPassword" class="form-control" placeholder="Min 6 characters" value="Password123" minlength="6" required>
+              </div>
+            </div>
+
+            <!-- State & District -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regState">State <span class="required">*</span></label>
+                <select id="regState" class="form-control" required>
+                  <option value="Haryana" selected>Haryana</option>
+                  <option value="Punjab">Punjab</option>
+                  <option value="Madhya Pradesh">Madhya Pradesh</option>
+                  <option value="Uttar Pradesh">Uttar Pradesh</option>
+                  <option value="Rajasthan">Rajasthan</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="regDistrict">District <span class="required">*</span></label>
+                <input type="text" id="regDistrict" class="form-control" placeholder="e.g. Karnal" value="Karnal" required>
+              </div>
+            </div>
+
+            <!-- Village & Land -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="regVillage">Village / Town</label>
+                <input type="text" id="regVillage" class="form-control" placeholder="e.g. Taraori" value="Taraori">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="regLand">Landholding (Acres)</label>
+                <input type="number" id="regLand" class="form-control" placeholder="e.g. 5.0" value="5.0" step="0.5">
+              </div>
+            </div>
+
+            <button type="submit" id="btnRegisterSubmit" class="btn btn-primary btn-lg btn-block" style="margin-top: 0.85rem; font-weight: 700;">
+              Register &amp; Create Account →
+            </button>
+          </form>
+
+          <div style="margin-top: 1.25rem; text-align: center; font-size: 0.875rem;">
+            Already registered? <a href="login.html" style="font-weight: 700; color: var(--green-dark);">Sign In here</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Procure Smart Mandi &nbsp;|&nbsp; <span class="badge badge-demo">DEMO MODE</span></p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en" class="admin-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | KISSAN – Procure Smart Mandi</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="admin-page">
+
+  <!-- Demo Banner -->
+  <div class="demo-banner">
+    🔬 <strong>OFFICER CONSOLE</strong> — SMS: Simulated (Mock Mode) &nbsp;|&nbsp; Data: Local Server &nbsp;|&nbsp; SIH 2026 Demo
+  </div>
+
+  <!-- Dark Admin Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🎛️</div>
+        <div>KISSAN <span class="brand-tagline">Officer Console</span></div>
+      </a>
+
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="admin-dashboard.html" class="active">Dashboard</a></li>
+        <li><a href="admin-slots.html">Slots</a></li>
+        <li><a href="admin-queue.html">Queue</a></li>
+        <li><a href="admin-procurement.html">Weighment</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm" id="adminAvatarLetter">A</div>
+          <span id="adminNameDisplay">Officer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 3rem;">
+
+      <!-- Page Header -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 style="font-size: 1.6rem; font-weight: 800;">Operations Dashboard</h1>
+          <p style="color: var(--text-muted); margin-top: 0.2rem; font-size: 0.875rem;">
+            Today's mandi operations summary — <span id="todayDateDisplay"></span>
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button id="refreshDashboardStatsBtn" class="btn btn-secondary">🔄 Refresh</button>
+          <a href="admin-queue.html" class="btn btn-accent">📢 Call Next Token</a>
+          <a href="admin-procurement.html" class="btn btn-primary">⚖️ Record Weighment</a>
+        </div>
+      </div>
+
+      <!-- TODAY'S KPI GRID -->
+      <div style="margin-bottom: 1.75rem;">
+        <div class="flex-between mb-3">
+          <h2 style="font-size: 1rem; color: var(--text);">Today's Summary</h2>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div class="live-indicator">
+              <div class="live-dot"></div>
+              Live
+            </div>
+            <span class="badge badge-success" id="realtimeStatusBadge">Active</span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+
+          <div class="ops-stat-card card-border-blue">
+            <div class="ops-stat-label">📅 Total Bookings</div>
+            <div class="ops-stat-value" id="admStatTotalBookingsToday" style="color: var(--blue);">0</div>
+            <div class="ops-stat-sublabel">Scheduled today</div>
+          </div>
+
+          <div class="ops-stat-card card-border-amber">
+            <div class="ops-stat-label">⏳ Waiting</div>
+            <div class="ops-stat-value" id="admStatWaitingFarmers" style="color: var(--amber);">0</div>
+            <div class="ops-stat-sublabel">In queue now</div>
+          </div>
+
+          <div class="ops-stat-card" style="border-left: 4px solid var(--purple);">
+            <div class="ops-stat-label" style="color: var(--purple);">📢 Called</div>
+            <div class="ops-stat-value" id="admStatCalledFarmers" style="color: var(--purple);">0</div>
+            <div class="ops-stat-sublabel">Tokens called</div>
+          </div>
+
+          <div class="ops-stat-card card-border-green">
+            <div class="ops-stat-label">✅ Completed</div>
+            <div class="ops-stat-value" id="admStatCompletedFarmers" style="color: var(--green);">0</div>
+            <div class="ops-stat-sublabel">Procurements done</div>
+          </div>
+
+          <div class="ops-stat-card card-border-green">
+            <div class="ops-stat-label">⚖️ Procured Today</div>
+            <div class="ops-stat-value" id="admStatProcuredQtyToday" style="color: var(--green-dark); font-size: 1.5rem;">0 Qtl</div>
+            <div class="ops-stat-sublabel">Net weight</div>
+          </div>
+
+          <div class="ops-stat-card card-border-green">
+            <div class="ops-stat-label">💹 Total Value</div>
+            <div class="ops-stat-value" id="admStatTotalProcurementAmount" style="color: var(--green-dark); font-size: 1.5rem;">₹0</div>
+            <div class="ops-stat-sublabel">MSP value procured</div>
+          </div>
+
+          <div class="ops-stat-card" style="border-left: 4px solid #16a34a; background: linear-gradient(135deg, #f0fdf4, #ecfdf5);">
+            <div class="ops-stat-label" style="color: #166534;">✅ Payment Done</div>
+            <div class="ops-stat-value" id="admStatTotalPaidAmount" style="color: #15803d; font-size: 1.5rem;">₹0</div>
+            <div class="ops-stat-sublabel" id="admStatCompletedPaymentsLabel">0 Paid</div>
+          </div>
+
+          <div class="ops-stat-card" style="border-left: 4px solid #ea580c; background: linear-gradient(135deg, #fff7ed, #ffedd5);">
+            <div class="ops-stat-label" style="color: #c2410c;">⚠️ Pending DBT</div>
+            <div class="ops-stat-value" id="admStatPendingPayments" style="color: #c2410c; font-size: 1.5rem;">₹0</div>
+            <div class="ops-stat-sublabel" id="admStatPendingPaymentsLabel">0 Awaiting</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ACTION REQUIRED ALERTS -->
+      <div id="actionAlertsPanel" style="margin-bottom: 1.75rem; display: none;">
+        <h2 style="font-size: 1rem; margin-bottom: 0.75rem; color: var(--amber);">⚠️ Action Required</h2>
+        <div id="actionAlertsList">
+          <!-- Injected by admin.js -->
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS GRID -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+        <div class="card card-border-green">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🏛️</div>
+          <h3 style="font-size: 0.9rem; margin-bottom: 0.35rem;">Procurement Centres</h3>
+          <p style="font-size: 0.8rem; margin-bottom: 0.85rem;">Add and manage grain collection centres.</p>
+          <a href="admin-slots.html#centresSection" class="btn btn-sm btn-primary">Manage Centres</a>
+        </div>
+        <div class="card card-border-amber">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📅</div>
+          <h3 style="font-size: 0.9rem; margin-bottom: 0.35rem;">Procurement Slots</h3>
+          <p style="font-size: 0.8rem; margin-bottom: 0.85rem;">Schedule farmer arrival time windows.</p>
+          <a href="admin-slots.html#slotsSection" class="btn btn-sm btn-accent">Manage Slots</a>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--purple);">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📍</div>
+          <h3 style="font-size: 0.9rem; margin-bottom: 0.35rem;">Live Queue</h3>
+          <p style="font-size: 0.8rem; margin-bottom: 0.85rem;">Call tokens and manage farmer flow.</p>
+          <a href="admin-queue.html" class="btn btn-sm btn-secondary">Open Queue →</a>
+        </div>
+        <div class="card card-border-blue">
+          <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚖️</div>
+          <h3 style="font-size: 0.9rem; margin-bottom: 0.35rem;">Weighment & Payment</h3>
+          <p style="font-size: 0.8rem; margin-bottom: 0.85rem;">Record weighments, mark DBT payments.</p>
+          <a href="admin-procurement.html" class="btn btn-sm btn-secondary">Record Weighment →</a>
+        </div>
+      </div>
+
+      <!-- CHART: Farmers by Slot -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <h2 class="card-title" style="font-size: 0.95rem;">📊 Farmers by Hourly Slot</h2>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span class="badge badge-info" id="chartTotalBookingsBadge">0 Today</span>
+          </div>
+        </div>
+        <div style="padding: 0.5rem; height: 260px; position: relative;">
+          <canvas id="hourlySlotChart"></canvas>
+        </div>
+      </div>
+
+      <!-- CENTRES TABLE -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <h2 class="card-title" style="font-size: 0.95rem;">🏛️ Procurement Centres</h2>
+          <a href="admin-slots.html#centresSection" class="btn btn-sm btn-primary">+ Add Centre</a>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Centre Name</th>
+                <th>Location</th>
+                <th>Capacity</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="procurementCentresTableBody">
+              <tr><td colspan="4" style="text-align:center; padding:1.5rem; color:var(--text-muted);">
+                <div class="spinner" style="margin:0 auto 0.5rem;"></div>Loading centres...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TODAY'S BOOKINGS -->
+      <div class="card mb-6">
+        <div class="card-header">
+          <h2 class="card-title" style="font-size: 0.95rem;">📋 Today's Bookings</h2>
+          <a href="admin-queue.html" class="btn btn-sm btn-secondary">Open Queue →</a>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Farmer</th>
+                <th>Crop</th>
+                <th>Qty</th>
+                <th>Vehicle</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admRecentActivityTable">
+              <tr><td colspan="7" style="text-align:center; padding:1.5rem; color:var(--text-muted);">
+                <div class="spinner" style="margin:0 auto 0.5rem;"></div>Loading bookings...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMS GATEWAY CONSOLE -->
+      <div class="card" id="smsConsoleCard">
+        <div class="card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <h2 class="card-title" style="font-size: 0.95rem;">💬 SMS Gateway — Live Delivery Console</h2>
+              <span id="smsActiveModeBadge" class="sms-channel-badge simulated">DEMO — SMS SIMULATED</span>
+            </div>
+            <p style="margin: 0.2rem 0 0; font-size: 0.78rem; color: var(--text-muted);">
+              Real-time audit log of SMS notifications across all booking, queue, and payment events.
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <select id="smsModeSelect" class="form-control" style="font-size: 0.8rem; padding: 0.3rem 0.65rem; width: auto; min-height: 34px;">
+              <option value="mock">Mode: Mock Simulator (Zero-Cost)</option>
+              <option value="msg91">Mode: MSG91 (Production)</option>
+            </select>
+            <button id="btnOpenTestSmsModal" class="btn btn-sm btn-accent">Test Mock SMS</button>
+            <button id="btnRefreshSmsLogs" class="btn btn-sm btn-secondary">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <!-- SMS Metrics -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; padding: 1rem; background: var(--bg); border-bottom: 1px solid var(--border);">
+          <div style="background: white; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--border);">
+            <div style="font-size: 0.68rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Dispatched</div>
+            <div id="smsStatTotal" style="font-size: 1.5rem; font-weight: 800;">0</div>
+          </div>
+          <div style="background: white; padding: 0.75rem; border-radius: var(--radius); border: 1px solid #bae6fd;">
+            <div style="font-size: 0.68rem; text-transform: uppercase; color: #0369a1; font-weight: 600;">Simulated</div>
+            <div id="smsStatSimulated" style="font-size: 1.5rem; font-weight: 800; color: #0284c7;">0</div>
+          </div>
+          <div style="background: white; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--green-200);">
+            <div style="font-size: 0.68rem; text-transform: uppercase; color: var(--green); font-weight: 600;">Sent / Delivered</div>
+            <div id="smsStatDelivered" style="font-size: 1.5rem; font-weight: 800; color: var(--green);">0</div>
+          </div>
+          <div style="background: white; padding: 0.75rem; border-radius: var(--radius); border: 1px solid #fecaca;">
+            <div style="font-size: 0.68rem; text-transform: uppercase; color: var(--red); font-weight: 600;">Failed</div>
+            <div id="smsStatFailed" style="font-size: 1.5rem; font-weight: 800; color: var(--red);">0</div>
+          </div>
+          <div style="background: white; padding: 0.75rem; border-radius: var(--radius); border: 1px solid var(--amber-200);">
+            <div style="font-size: 0.68rem; text-transform: uppercase; color: var(--amber); font-weight: 600;">Pending</div>
+            <div id="smsStatPending" style="font-size: 1.5rem; font-weight: 800; color: var(--amber);">0</div>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div style="display: flex; gap: 0.75rem; padding: 0.75rem 1rem; background: white; border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center;">
+          <div style="display:flex; align-items:center; gap: 0.4rem; font-size:0.8rem;">
+            <span style="color:var(--text-muted);">Status:</span>
+            <select id="smsFilterStatus" class="form-control" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; width: auto; min-height: 32px;">
+              <option value="">All Statuses</option>
+              <option value="SIMULATED">Simulated</option>
+              <option value="SENT">Sent</option>
+              <option value="DELIVERED">Delivered</option>
+              <option value="FAILED">Failed</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:center; gap: 0.4rem; font-size:0.8rem;">
+            <span style="color:var(--text-muted);">Event:</span>
+            <select id="smsFilterType" class="form-control" style="font-size: 0.8rem; padding: 0.25rem 0.5rem; width: auto; min-height: 32px;">
+              <option value="">All Events</option>
+              <option value="BOOKING_CONFIRMED">Booking Confirmed</option>
+              <option value="TOKEN_APPROACHING">Token Approaching</option>
+              <option value="TOKEN_CALLED">Token Called</option>
+              <option value="PROCUREMENT_COMPLETED">Procurement Completed</option>
+              <option value="PAYMENT_STATUS_UPDATED">Payment Processed</option>
+            </select>
+          </div>
+          <div style="margin-left: auto; font-size: 0.75rem; color: var(--slate-500);">
+            Recipients masked for privacy (<code>98765*****</code>)
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Recipient</th>
+                <th>Event</th>
+                <th>Provider</th>
+                <th>Status</th>
+                <th>Message</th>
+                <th>Preview</th>
+              </tr>
+            </thead>
+            <tbody id="smsLogsTableBody">
+              <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1.5rem;">
+                <div class="spinner" style="margin:0 auto 0.5rem;"></div>Loading SMS delivery logs...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Test Mock SMS Modal -->
+  <div class="modal" id="testSmsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 520px; margin: 1rem; box-shadow: var(--shadow-xl);">
+      <div class="card-header">
+        <h3 class="card-title">Test Mock SMS (Simulator)</h3>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="closeTestSmsModal()">✕</button>
+      </div>
+      <form id="testSmsForm" style="padding: 1.25rem;">
+        <div class="form-group">
+          <label class="form-label" for="testSmsPhone">Farmer Mobile Number <span class="required">*</span></label>
+          <input type="text" id="testSmsPhone" class="form-control" placeholder="9876543210" required maxlength="10">
+          <div class="form-hint">10-digit Indian mobile number</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="testSmsType">Notification Event <span class="required">*</span></label>
+          <select id="testSmsType" class="form-control" required>
+            <option value="BOOKING_CONFIRMED">1. BOOKING_CONFIRMED — Slot Booking Confirmed</option>
+            <option value="TOKEN_APPROACHING">2. TOKEN_APPROACHING — Queue Notice (≤3 ahead)</option>
+            <option value="TOKEN_CALLED">3. TOKEN_CALLED — Called to Weighbridge</option>
+            <option value="PROCUREMENT_COMPLETED">4. PROCUREMENT_COMPLETED — Form J Generated</option>
+            <option value="PAYMENT_STATUS_UPDATED">5. PAYMENT_STATUS_UPDATED — DBT Payment Disbursed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="testSmsFarmerName">Farmer Name</label>
+          <input type="text" id="testSmsFarmerName" class="form-control" value="Rameshwar Singh">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="testSmsBookingId">Booking ID (Optional)</label>
+          <input type="text" id="testSmsBookingId" class="form-control" placeholder="e.g. BK-1024 (auto-generated if blank)">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeTestSmsModal()">Cancel</button>
+          <button type="submit" id="btnSubmitTestSms" class="btn btn-primary">Dispatch Mock SMS →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SMS Preview Modal -->
+  <div class="modal" id="smsMessagePreviewModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 480px; margin: 1rem; box-shadow: var(--shadow-xl);">
+      <div class="card-header">
+        <h3 class="card-title">SMS Content Preview</h3>
+        <button type="button" class="btn btn-sm btn-secondary" onclick="closeSmsPreviewModal()">✕</button>
+      </div>
+      <div style="padding: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.75rem; color: var(--slate-600);">
+          <span><strong>Recipient:</strong> <span id="previewRecipient">--</span></span>
+          <span id="previewStatusBadge"></span>
+        </div>
+        <div style="background: #f1f5f9; padding: 1rem; border-radius: var(--radius-lg); border: 1px solid var(--border); font-family: monospace; font-size: 0.875rem; line-height: 1.55; color: var(--slate-900);" id="previewMessageText">--</div>
+        <div style="margin-top: 0.75rem; font-size: 0.75rem; color: var(--slate-500); display: flex; justify-content: space-between;">
+          <span><strong>Template ID:</strong> <span id="previewTemplateId">--</span></span>
+          <span><strong>Provider:</strong> <span id="previewProvider">--</span></span>
+        </div>
+      </div>
+      <div style="padding: 0.75rem 1.25rem; background: var(--bg); border-top: 1px solid var(--border); text-align: right;">
+        <button type="button" class="btn btn-sm btn-primary" onclick="closeSmsPreviewModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Officer Console &nbsp;|&nbsp; <span class="badge badge-demo">DEMO MODE</span></p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script src="js/notifications.js?v=20260919"></script>
+  <script src="js/sms-client.js?v=20260919"></script>
+  <script src="js/admin.js?v=20260919"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // Display today's date
+    const dateEl = document.getElementById('todayDateDisplay');
+    if (dateEl) {
+      dateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" class="farmer-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings | KISSAN – Procure Smart Mandi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="farmer-page">
+
+  <!-- Top Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="farmer-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🌾</div>
+        <div>KISSAN <span class="brand-tagline">Farmer Portal</span></div>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="farmer-dashboard.html">Home</a></li>
+        <li><a href="book-slot.html">Book Slot</a></li>
+        <li><a href="my-booking.html" class="active">My Booking</a></li>
+        <li><a href="queue.html">Queue</a></li>
+        <li><a href="procurement.html">Procurement</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm">F</div>
+          <span id="farmerNameDisplay">Farmer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 4rem;">
+
+      <!-- Header -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 style="font-size: 1.6rem; font-weight: 800;">🎫 My Bookings</h1>
+          <p style="color: var(--text-muted); margin-top: 0.25rem; font-size: 0.875rem;">
+            View your slot bookings, show your QR pass, or cancel a booking.
+          </p>
+        </div>
+        <a href="book-slot.html" class="btn btn-primary">+ Book Another Slot</a>
+      </div>
+
+      <!-- LATEST / ACTIVE BOOKING HERO -->
+      <div id="latestBookingSection" style="margin-bottom: 2rem;">
+        <div class="flex-between mb-3">
+          <h2 style="font-size: 1.05rem;">Current / Latest Booking</h2>
+          <span id="latestBookingTimestamp" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+        </div>
+        <div id="latestBookingContainer">
+          <div class="booking-hero-card" style="display:flex; align-items:center; justify-content:center; min-height:120px;">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER TABS + ALL BOOKINGS -->
+      <div id="bookingHistorySection">
+        <div class="flex-between flex-wrap gap-3 mb-4">
+          <h2 style="font-size: 1.05rem;">All Bookings</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+            <button class="btn btn-sm btn-primary booking-filter-btn active" data-filter="ALL">All</button>
+            <button class="btn btn-sm btn-secondary booking-filter-btn" data-filter="WAITING">⏳ Waiting</button>
+            <button class="btn btn-sm btn-secondary booking-filter-btn" data-filter="CALLED">📢 Called</button>
+            <button class="btn btn-sm btn-secondary booking-filter-btn" data-filter="IN_PROGRESS">⚙️ In Progress</button>
+            <button class="btn btn-sm btn-secondary booking-filter-btn" data-filter="COMPLETED">✅ Completed</button>
+            <button class="btn btn-sm btn-secondary booking-filter-btn" data-filter="CANCELLED">❌ Cancelled</button>
+          </div>
+        </div>
+
+        <div id="bookingsListContainer">
+          <!-- Rendered by booking.js -->
+          <div style="text-align:center; padding:2.5rem; color:var(--text-muted);">
+            <div class="spinner" style="margin:0 auto 0.75rem;"></div>
+            Loading your bookings...
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Gate Pass Modal (QR pass) -->
+  <div class="modal-overlay" id="bookingSuccessModal">
+    <div class="modal-dialog" style="max-width: 420px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, var(--green-dark), #166534); border-radius: 12px 12px 0 0;">
+        <h3 style="margin: 0; color: white; font-size: 1rem;">🎫 Mandi Entry Pass</h3>
+        <button onclick="closeModal('bookingSuccessModal')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.25rem; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 4px; line-height: 1;">✕</button>
+      </div>
+      <div class="modal-body" id="modalPassContent"></div>
+      <div class="modal-footer">
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ Print</button>
+        <a href="queue.html" class="btn btn-accent">📍 Queue</a>
+        <button onclick="closeModal('bookingSuccessModal')" class="btn btn-primary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="farmer-dashboard.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">🏠</span><span>Home</span>
+      </a>
+      <a href="book-slot.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📅</span><span>Book</span>
+      </a>
+      <a href="farmer-dashboard.html#kissanAiCard" class="bottom-nav-item ai-btn">
+        <span class="bottom-nav-icon">🤖</span><span>Saathi</span>
+      </a>
+      <a href="queue.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📍</span><span>Queue</span>
+      </a>
+      <a href="procurement.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">💰</span><span>Pay</span>
+      </a>
+    </div>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Procure Smart Mandi</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/qrcode-lib.js"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script src="js/notifications.js?v=20260919"></script>
+  <script src="js/booking.js?v=20260919"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+  </script>
+</body>
+</html>

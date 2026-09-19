@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" class="admin-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queue Management | KISSAN – Officer Console</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-page">
+
+  <!-- Admin Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🎛️</div>
+        <div>KISSAN <span class="brand-tagline">Officer Console</span></div>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="admin-dashboard.html">Dashboard</a></li>
+        <li><a href="admin-slots.html">Slots</a></li>
+        <li><a href="admin-queue.html" class="active">Queue</a></li>
+        <li><a href="admin-procurement.html">Weighment</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm">A</div>
+          <span id="adminNameDisplay">Officer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 3rem;">
+
+      <!-- Page Header with Primary Action -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 style="font-size: 1.6rem; font-weight: 800;">Queue Management</h1>
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.2rem;">
+            Call tokens and advance farmers through weighment. <span id="queueDateLabel" style="font-weight:600; color:var(--text);"></span>
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-open-scanner">📷 Scan QR</button>
+          <button id="adminRefreshQueueBtn" class="btn btn-secondary">🔄 Refresh</button>
+          <button id="adminCallNextAutoBtn" class="btn btn-accent btn-lg" style="font-size: 1rem; font-weight: 700; min-width: 180px;">
+            📢 Call Next Farmer
+          </button>
+        </div>
+      </div>
+
+      <!-- NOW SERVING HERO -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+
+        <!-- Currently called token -->
+        <div class="card" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 2px solid var(--amber-200); text-align: center; padding: 1.75rem;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; color: var(--amber); margin-bottom: 0.5rem;">NOW SERVING</div>
+          <div id="admStatCurrentServing" style="font-size: 4rem; font-weight: 900; color: var(--amber); line-height: 1; font-family: monospace; letter-spacing: 0.1em;">--</div>
+          <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Current active token</div>
+        </div>
+
+        <!-- Queue stats -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div class="stat-card" style="text-align:center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 0.3rem;">⏳ Waiting</div>
+            <div id="admStatWaitingCount" style="font-size: 2rem; font-weight: 900; color: var(--amber);">0</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 0.3rem;">⚙️ In Progress</div>
+            <div id="admStatInProgressCount" style="font-size: 2rem; font-weight: 900; color: var(--blue);">0</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 0.3rem;">✅ Completed</div>
+            <div id="admStatCompletedCount" style="font-size: 2rem; font-weight: 900; color: var(--green);">0</div>
+          </div>
+          <div class="stat-card" style="text-align:center;">
+            <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 600; color: var(--text-muted); margin-bottom: 0.3rem;">📢 Total</div>
+            <div id="admStatTotalQueueCount" style="font-size: 2rem; font-weight: 900; color: var(--text);">0</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Queue Table -->
+      <div class="card">
+        <div class="flex-between flex-wrap gap-3 mb-4" style="border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
+          <div>
+            <h2 style="font-size: 1rem; margin: 0;">Today's Queue</h2>
+            <p style="margin: 0.2rem 0 0; color: var(--text-muted); font-size: 0.8rem;">Ordered by token number. Click "Call" or "Complete" to advance status.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="date" id="adminQueueDateFilter" class="form-control" style="padding: 0.35rem 0.6rem; font-size: 0.875rem; width: auto; min-height: 36px;">
+            <span id="todayQueueTotalBadge" class="badge badge-info">0 Bookings</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Farmer</th>
+                <th>Crop / Qty</th>
+                <th>Centre</th>
+                <th>Time</th>
+                <th>Wait</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminTodayQueueTableBody">
+              <tr>
+                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">
+                  <div class="spinner" style="margin: 0 auto 0.5rem;"></div>
+                  Loading queue...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state -->
+        <div id="queuePageEmptyState" style="display:none;" class="empty-state">
+          <div class="empty-state-icon">📍</div>
+          <div class="empty-state-title">Queue is clear today</div>
+          <p class="empty-state-desc">No active bookings for today's queue. Bookings will appear here as farmers register.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- QR Scanner Modal -->
+  <div class="modal-overlay" id="gateScannerModal">
+    <div class="modal-dialog" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 style="margin: 0;">📷 Scan Farmer Gate Pass</h3>
+        <button onclick="closeGateQrScanner()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1rem; text-align: center;">
+          Point camera at the farmer's gate pass QR code, or enter token manually.
+        </p>
+        <div id="qrReaderView" style="width: 100%; max-width: 300px; min-height: 220px; margin: 0 auto 1rem; border-radius: var(--radius-lg); overflow: hidden; background: #0f172a; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.875rem;">
+          Camera not available
+        </div>
+        <div style="border-top: 1px solid var(--border); padding-top: 0.85rem;">
+          <label class="form-label" style="font-size: 0.82rem;">Or enter token manually:</label>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="manualTokenInput" class="form-control" placeholder="e.g. KSM-042" style="text-transform: uppercase;">
+            <button onclick="handleManualQrSearch()" class="btn btn-primary" style="white-space: nowrap;">Verify</button>
+          </div>
+        </div>
+        <div id="scannedFarmerResult" style="display: none; margin-top: 1rem;"></div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeGateQrScanner()" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Officer Console</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/qrcode-lib.js"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script src="js/notifications.js?v=20260919"></script>
+  <script src="js/sms-client.js?v=20260919"></script>
+  <script src="js/admin.js?v=20260919"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // Date label
+    const ql = document.getElementById('queueDateLabel');
+    if (ql) ql.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+  </script>
+</body>
+</html>

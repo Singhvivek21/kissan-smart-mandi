@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" class="farmer-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Slot | KISSAN – Procure Smart Mandi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="farmer-page">
+
+  <!-- Top Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="farmer-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🌾</div>
+        <div>KISSAN <span class="brand-tagline">Farmer Portal</span></div>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="farmer-dashboard.html">Home</a></li>
+        <li><a href="book-slot.html" class="active">Book Slot</a></li>
+        <li><a href="my-booking.html">My Booking</a></li>
+        <li><a href="queue.html">Queue</a></li>
+        <li><a href="procurement.html">Procurement</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm">F</div>
+          <span id="farmerNameDisplay">Farmer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container-narrow" style="padding: 1.5rem 1.25rem 4rem;">
+
+      <!-- Header -->
+      <div style="margin-bottom: 1.75rem;">
+        <h1 style="font-size: 1.6rem; font-weight: 800;">Book a Procurement Slot</h1>
+        <p style="color: var(--text-muted); margin-top: 0.3rem; font-size: 0.9rem;">
+          Choose your nearest centre, crop details, and available time. You'll receive a digital token after booking.
+        </p>
+      </div>
+
+      <!-- BOOKING STEPPER PROGRESS -->
+      <div class="stepper mb-6" id="bookingStepperBar">
+        <div class="step-item active" id="step1">
+          <div class="step-circle">1</div>
+          <div class="step-title">Centre</div>
+        </div>
+        <div class="step-item" id="step2">
+          <div class="step-circle">2</div>
+          <div class="step-title">Crop</div>
+        </div>
+        <div class="step-item" id="step3">
+          <div class="step-circle">3</div>
+          <div class="step-title">Date</div>
+        </div>
+        <div class="step-item" id="step4">
+          <div class="step-circle">4</div>
+          <div class="step-title">Time Slot</div>
+        </div>
+        <div class="step-item" id="step5">
+          <div class="step-circle">5</div>
+          <div class="step-title">Confirm</div>
+        </div>
+      </div>
+
+      <!-- BOOKING FORM CARD -->
+      <div class="card" style="border-top: 3px solid var(--green);">
+        <form id="slotBookingForm">
+
+          <!-- STEP 1: Centre -->
+          <div class="form-group">
+            <label class="form-label" for="bookMandiSelect">
+              🏛️ Procurement Centre <span class="required">*</span>
+            </label>
+            <select id="bookMandiSelect" class="form-control" required onchange="updateBookingStep(1)">
+              <!-- Populated by booking.js -->
+            </select>
+            <div class="form-hint">Select the mandi centre nearest to your farm.</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- STEP 2: Crop & Quantity -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="bookCropSelect">
+                🌾 Crop Type <span class="required">*</span>
+              </label>
+              <select id="bookCropSelect" class="form-control" required onchange="updateBookingStep(2)">
+                <!-- Populated by booking.js -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="bookQuantityInput">
+                ⚖️ Quantity (Quintals) <span class="required">*</span>
+              </label>
+              <input
+                type="number"
+                id="bookQuantityInput"
+                class="form-control"
+                placeholder="e.g. 40"
+                value="40"
+                min="1"
+                max="500"
+                required
+                onchange="updateBookingStep(2)"
+              >
+              <div class="form-hint">Approximate weight in quintals (1 Qtl = 100 Kg)</div>
+            </div>
+          </div>
+
+          <!-- MSP Preview -->
+          <div id="mspPreviewRow" style="display: none; background: var(--green-50); border: 1px solid var(--green-100); border-radius: var(--radius-lg); padding: 0.75rem 1rem; margin-bottom: 1.1rem;">
+            <div style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.3rem;">Estimated MSP Value</div>
+            <div id="mspPreviewValue" style="font-size: 1.25rem; font-weight: 800; color: var(--green-dark);">–</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">Based on current government MSP rate</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- STEP 3: Date -->
+          <div class="form-group">
+            <label class="form-label" for="bookDateInput">
+              📅 Visit Date <span class="required">*</span>
+            </label>
+            <input type="date" id="bookDateInput" class="form-control" required onchange="updateBookingStep(3)">
+            <div class="form-hint">Choose a date within the next 14 days.</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- STEP 4: Time Slot Grid -->
+          <div class="form-group">
+            <div class="flex-between mb-2">
+              <label class="form-label" style="margin: 0;">
+                🕐 Available Time Slots <span class="required">*</span>
+              </label>
+              <span id="slotsCountInfo" style="font-size: 0.78rem; color: var(--text-muted);"></span>
+            </div>
+
+            <!-- Slot legend -->
+            <div style="display: flex; gap: 1rem; margin-bottom: 0.75rem; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap;">
+              <span><span class="slot-dot high"></span> Available</span>
+              <span><span class="slot-dot medium"></span> Few left</span>
+              <span><span class="slot-dot low"></span> Almost full</span>
+            </div>
+
+            <div class="slot-grid" id="slotGridContainer">
+              <!-- Loading placeholder -->
+              <div style="grid-column: 1/-1; text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.875rem;">
+                Select a centre and date to see available slots
+              </div>
+            </div>
+
+            <div id="noSlotsNotice" style="display: none; padding: 1.25rem; background: var(--bg); border: 1.5px dashed var(--border); border-radius: var(--radius-lg); text-align: center; color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+              No slots available on this date. Try a different date.
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- STEP 5: Vehicle (optional) -->
+          <details style="margin-bottom: 1.25rem;">
+            <summary style="font-size: 0.875rem; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 0.4rem 0; list-style: none; display: flex; align-items: center; gap: 0.5rem;">
+              🚜 Vehicle details <span style="font-weight:400;">(optional)</span>
+            </summary>
+            <div class="form-row" style="margin-top: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="bookVehicleType">Vehicle Type</label>
+                <select id="bookVehicleType" class="form-control">
+                  <option value="Tractor Trolley" selected>Tractor Trolley</option>
+                  <option value="Mini Truck / Pickup">Mini Truck / Pickup</option>
+                  <option value="Large Truck (6/10 Wheeler)">Large Truck</option>
+                  <option value="Bullock Cart / Cart">Bullock Cart / Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="bookVehicleNumber">Vehicle Number</label>
+                <input type="text" id="bookVehicleNumber" class="form-control" placeholder="e.g. HR-05-AB-7721">
+              </div>
+            </div>
+          </details>
+
+          <!-- BOOKING SUMMARY PREVIEW (shown when slot is selected) -->
+          <div id="bookingSummaryPreview" style="display: none; background: linear-gradient(135deg, var(--green-50), #ecfdf5); border: 1.5px solid var(--green-200); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--green-dark); margin-bottom: 0.85rem;">📋 Booking Summary</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.875rem;">
+              <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Centre</span><strong id="summCentre">–</strong></div>
+              <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Crop</span><strong id="summCrop">–</strong></div>
+              <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Date</span><strong id="summDate">–</strong></div>
+              <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Time</span><strong id="summTime">–</strong></div>
+              <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Quantity</span><strong id="summQty">–</strong></div>
+              <div><span style="color:var(--text-muted); font-size:0.75rem; display:block;">Est. Value</span><strong id="summValue" style="color:var(--green-dark);">–</strong></div>
+            </div>
+          </div>
+
+          <button type="submit" id="btnConfirmBooking" class="btn btn-primary btn-xl btn-block" style="font-size: 1rem; font-weight: 700;">
+            🎫 Confirm Booking & Get Token
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- BOOKING SUCCESS MODAL -->
+  <div class="modal-overlay" id="bookingSuccessModal">
+    <div class="modal-dialog" style="max-width: 480px;">
+
+      <!-- Success Header -->
+      <div class="booking-confirm-hero">
+        <div class="booking-confirm-check">✓</div>
+        <div style="font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; color: #bbf7d0; font-weight: 600; margin-bottom: 0.25rem;">Booking Confirmed!</div>
+        <div style="font-size: 0.85rem; color: #dcfce7;">Your token number is</div>
+        <div class="booking-confirm-token" id="confirmTokenDisplay">–</div>
+        <div style="font-size: 0.8rem; color: #bbf7d0; margin-top: 0.35rem;">Show this at the entry gate</div>
+      </div>
+
+      <!-- Pass Content -->
+      <div class="modal-body" id="modalPassContent" style="padding: 1.25rem;">
+        <!-- Injected by booking.js -->
+      </div>
+
+      <div class="modal-footer">
+        <button onclick="window.print()" class="btn btn-secondary">🖨️ Print Pass</button>
+        <a href="queue.html" class="btn btn-accent">📍 View Queue</a>
+        <a href="my-booking.html" class="btn btn-primary">My Bookings →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="farmer-dashboard.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">🏠</span><span>Home</span>
+      </a>
+      <a href="book-slot.html" class="bottom-nav-item active">
+        <span class="bottom-nav-icon">📅</span><span>Book</span>
+      </a>
+      <a href="farmer-dashboard.html#kissanAiCard" class="bottom-nav-item ai-btn">
+        <span class="bottom-nav-icon">🤖</span><span>Saathi</span>
+      </a>
+      <a href="queue.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📍</span><span>Queue</span>
+      </a>
+      <a href="procurement.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">💰</span><span>Pay</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Procure Smart Mandi</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/qrcode-lib.js"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script src="js/notifications.js?v=20260919"></script>
+  <script src="js/sms-client.js?v=20260919"></script>
+  <script src="js/booking.js?v=20260919"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // Stepper progress updater (visual only, form logic stays in booking.js)
+    function updateBookingStep(step) {
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById('step' + i);
+        if (!el) continue;
+        if (i < step) { el.classList.add('done'); el.classList.remove('active'); }
+        else if (i === step) { el.classList.add('active'); el.classList.remove('done'); }
+        else { el.classList.remove('active', 'done'); }
+      }
+    }
+
+    // MSP rates for live preview
+    const MSP_RATES = { 'Wheat': 2275, 'Paddy': 2203, 'Mustard': 5650, 'Gram': 5440, 'Maize': 2090, 'Cotton': 6620 };
+
+    function updateMspPreview() {
+      const crop = document.getElementById('bookCropSelect')?.value || '';
+      const qty  = parseFloat(document.getElementById('bookQuantityInput')?.value) || 0;
+      const preview = document.getElementById('mspPreviewRow');
+      const val = document.getElementById('mspPreviewValue');
+      if (!preview || !val) return;
+
+      const cropKey = Object.keys(MSP_RATES).find(k => crop.toLowerCase().includes(k.toLowerCase()));
+      if (cropKey && qty > 0) {
+        const amount = MSP_RATES[cropKey] * qty;
+        val.textContent = '₹' + amount.toLocaleString('en-IN') + ' (₹' + MSP_RATES[cropKey].toLocaleString('en-IN') + '/Qtl × ' + qty + ' Qtl)';
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    document.getElementById('bookCropSelect')?.addEventListener('change', updateMspPreview);
+    document.getElementById('bookQuantityInput')?.addEventListener('input', updateMspPreview);
+  </script>
+</body>
+</html>

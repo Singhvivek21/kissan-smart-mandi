@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" class="admin-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weighment & Procurement | KISSAN – Officer Console</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-page">
+
+  <!-- Admin Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="admin-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🎛️</div>
+        <div>KISSAN <span class="brand-tagline">Officer Console</span></div>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="admin-dashboard.html">Dashboard</a></li>
+        <li><a href="admin-slots.html">Slots</a></li>
+        <li><a href="admin-queue.html">Queue</a></li>
+        <li><a href="admin-procurement.html" class="active">Weighment</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm">A</div>
+          <span id="adminNameDisplay">Officer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 3rem;">
+
+      <!-- Page Header -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 style="font-size: 1.6rem; font-weight: 800;">⚖️ Weighment & Procurement</h1>
+          <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.2rem;">
+            Record crop weight, quality, and amount. Mark DBT payments.
+          </p>
+        </div>
+        <a href="admin-queue.html" class="btn btn-secondary">← Back to Queue</a>
+      </div>
+
+      <!-- PAYMENT SUMMARY STATS -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.75rem;">
+
+        <div class="ops-stat-card">
+          <div class="ops-stat-label">⚖️ Total Procured</div>
+          <div id="admStatTotalQtl" class="ops-stat-value" style="color: var(--green-dark);">0 Qtl</div>
+        </div>
+
+        <div class="ops-stat-card">
+          <div class="ops-stat-label">💹 Total Payout Value</div>
+          <div id="admStatTotalPayoutVal" class="ops-stat-value" style="color: var(--text);">₹0</div>
+        </div>
+
+        <div class="ops-stat-card" style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border-left: 4px solid #16a34a;">
+          <div class="ops-stat-label" style="color: #166534;">✅ Payment Settled</div>
+          <div id="admStatTotalPaidAmount" class="ops-stat-value" style="color: #15803d;">₹0</div>
+          <div class="ops-stat-sublabel" id="admStatPaidCountHint">0 Settled</div>
+        </div>
+
+        <div class="ops-stat-card" style="background: linear-gradient(135deg, #fff7ed, #ffedd5); border-left: 4px solid #ea580c;">
+          <div class="ops-stat-label" style="color: #c2410c;">⚠️ Pending DBT</div>
+          <div id="admStatPendingRecords" class="ops-stat-value" style="color: #c2410c;">₹0</div>
+          <div class="ops-stat-sublabel" id="admStatPendingCountHint">0 Awaiting</div>
+        </div>
+
+      </div>
+
+      <!-- PROCUREMENT ENTRY FORM -->
+      <div class="card mb-6" style="border-top: 3px solid var(--green);">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Record Procurement</h2>
+            <p style="margin: 0.2rem 0 0; font-size: 0.8rem; color: var(--text-muted);">
+              Select a token from today's queue and enter weighment details.
+            </p>
+          </div>
+          <span class="badge badge-success">MSP Rates Active</span>
+        </div>
+
+        <form id="adminProcurementForm">
+
+          <!-- Token & Farmer -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="procTokenSelect">
+                🎫 Select Booking / Token <span class="required">*</span>
+              </label>
+              <select id="procTokenSelect" class="form-control" required>
+                <!-- Populated dynamically by admin.js -->
+              </select>
+              <div class="form-hint">Choose from today's checked-in farmers</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="procFarmerName">Farmer Name</label>
+              <input type="text" id="procFarmerName" class="form-control" placeholder="Auto-filled from token" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="procFarmerPhone">Mobile</label>
+              <input type="text" id="procFarmerPhone" class="form-control" placeholder="10-digit" required>
+            </div>
+          </div>
+
+          <!-- Procurement Details Box -->
+          <div style="background: var(--bg); padding: 1.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border); margin-bottom: 1.25rem;">
+            <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; color: var(--text);">⚖️ Procurement Details</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="procCropName">Crop <span class="required">*</span></label>
+                <input type="text" id="procCropName" class="form-control" placeholder="e.g. Wheat (गेहूं)" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="procQuantity">Quantity (Quintals) <span class="required">*</span></label>
+                <input type="number" id="procQuantity" class="form-control" placeholder="e.g. 42.5" step="0.01" min="0.1" value="40.0" required oninput="updateMspCalcHint()">
+                <div class="form-hint">Net weight (1 Qtl = 100 Kg)</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="procQuality">Quality Grade <span class="required">*</span></label>
+                <select id="procQuality" class="form-control" required>
+                  <option value="FAQ Grade A (11.5% Moisture)" selected>FAQ Grade A (Best)</option>
+                  <option value="Grade B (12.2% Moisture)">Grade B (Standard)</option>
+                  <option value="Grade C (13.5% Moisture)">Grade C (Acceptable)</option>
+                  <option value="Premium Export Quality">Premium Export</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="procAmount">Total Amount (₹) <span class="required">*</span></label>
+                <input type="number" id="procAmount" class="form-control" placeholder="e.g. 91000" step="0.01" min="1" value="91000" required>
+                <div class="form-hint">MSP: <span id="mspCalcHint" style="font-weight:600; color:var(--green-dark);">40.0 × ₹2,275 = ₹91,000</span></div>
+              </div>
+            </div>
+
+            <!-- Status Row -->
+            <div class="form-row" style="margin-top: 0.75rem; border-top: 1px dashed var(--border); padding-top: 1rem;">
+              <div class="form-group">
+                <label class="form-label" for="procStatusSelect">Procurement Status <span class="required">*</span></label>
+                <select id="procStatusSelect" class="form-control" required>
+                  <option value="PENDING">Pending verification</option>
+                  <option value="VERIFIED">Verified</option>
+                  <option value="COMPLETED" selected>Completed</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="procPaymentStatus">Payment Status <span class="required">*</span></label>
+                <select id="procPaymentStatus" class="form-control" required>
+                  <option value="Direct DBT Initiated" selected>DBT Initiated</option>
+                  <option value="Pending Bank Account Verification">Pending Bank Verification</option>
+                  <option value="Direct DBT Credited">DBT Credited</option>
+                </select>
+                <div class="form-hint">Status tracking only — no payment gateway.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align: right;">
+            <button type="submit" id="btnSaveProcurement" class="btn btn-primary btn-lg">
+              💾 Save Procurement Record
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- PROCUREMENT RECORDS TABLE -->
+      <div class="card mb-6">
+        <div class="flex-between flex-wrap gap-3 mb-4" style="border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
+          <div>
+            <h2 style="font-size: 1rem; margin: 0;">Procurement Records</h2>
+            <p style="margin: 0.15rem 0 0; color: var(--text-muted); font-size: 0.8rem;">All mandi weighment records. Click a receipt to view details.</p>
+          </div>
+          <span id="procRecordsTotalBadge" class="badge badge-info">0 Records</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Receipt</th>
+                <th>Farmer</th>
+                <th>Crop</th>
+                <th>Quantity</th>
+                <th>Quality</th>
+                <th>Amount (₹)</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminProcurementTableBody">
+              <tr><td colspan="9" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                <div class="spinner" style="margin:0 auto 0.5rem;"></div>Loading records...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PAYMENT TRACKING TABLE -->
+      <div class="card">
+        <div class="flex-between flex-wrap gap-3 mb-4" style="border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
+          <div>
+            <h2 style="font-size: 1rem; margin: 0;">💰 Payment Tracking</h2>
+            <p style="margin: 0.15rem 0 0; color: var(--text-muted); font-size: 0.8rem;">Mark payments as paid to generate DBT transaction references and notify farmers via SMS.</p>
+          </div>
+          <span id="paymentsTotalCountBadge" class="badge badge-info">0 Payments</span>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Payment ID</th>
+                <th>Farmer</th>
+                <th>Crop</th>
+                <th>Amount (₹)</th>
+                <th>Status</th>
+                <th>Txn ID</th>
+                <th>Paid On</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminPaymentsTableBody">
+              <tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                <div class="spinner" style="margin:0 auto 0.5rem;"></div>Loading payments...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Receipt Modal -->
+  <div class="modal-overlay" id="jFormReceiptModal">
+    <div class="modal-dialog" style="max-width: 640px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, var(--green-dark), #166534); border-radius: 12px 12px 0 0;">
+        <h3 style="margin: 0; color: white;">📋 Procurement Receipt (Form J)</h3>
+        <button onclick="closeModal('jFormReceiptModal')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.25rem; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 4px; line-height: 1;">✕</button>
+      </div>
+      <div class="modal-body" id="jFormModalContent"></div>
+      <div class="modal-footer">
+        <button onclick="window.print()" class="btn btn-primary">🖨️ Print Receipt</button>
+        <button onclick="closeModal('jFormReceiptModal')" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Officer Console</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/qrcode-lib.js"></script>
+  <script src="js/supabase.js?v=20260919"></script>
+  <script src="js/auth.js?v=20260919"></script>
+  <script src="js/notifications.js?v=20260919"></script>
+  <script src="js/sms-client.js?v=20260919"></script>
+  <script src="js/admin.js?v=20260919"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // MSP calc hint updater
+    const MSP_RATES = { 'wheat': 2275, 'paddy': 2203, 'mustard': 5650, 'gram': 5440, 'maize': 2090, 'cotton': 6620, 'chana': 5440 };
+    function updateMspCalcHint() {
+      const crop = (document.getElementById('procCropName')?.value || '').toLowerCase();
+      const qty  = parseFloat(document.getElementById('procQuantity')?.value) || 0;
+      const hint = document.getElementById('mspCalcHint');
+      if (!hint) return;
+      const key = Object.keys(MSP_RATES).find(k => crop.includes(k));
+      if (key && qty > 0) {
+        const amt = Math.round(MSP_RATES[key] * qty);
+        hint.textContent = qty + ' Qtl × ₹' + MSP_RATES[key].toLocaleString('en-IN') + ' = ₹' + amt.toLocaleString('en-IN');
+        document.getElementById('procAmount').value = amt;
+      } else {
+        hint.textContent = 'Calculated automatically from crop and quantity';
+      }
+    }
+    document.getElementById('procCropName')?.addEventListener('input', updateMspCalcHint);
+    document.getElementById('procQuantity')?.addEventListener('input', updateMspCalcHint);
+  </script>
+</body>
+</html>

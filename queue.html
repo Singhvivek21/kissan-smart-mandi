@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" class="farmer-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Queue | KISSAN – Procure Smart Mandi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="farmer-page">
+
+  <!-- Top Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="farmer-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🌾</div>
+        <div>KISSAN <span class="brand-tagline">Live Queue</span></div>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="farmer-dashboard.html">Home</a></li>
+        <li><a href="book-slot.html">Book Slot</a></li>
+        <li><a href="my-booking.html">My Booking</a></li>
+        <li><a href="queue.html" class="active">Queue</a></li>
+        <li><a href="procurement.html">Procurement</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm">F</div>
+          <span id="farmerNameDisplay">Farmer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 4rem;">
+
+      <!-- Page Header -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 style="font-size: 1.6rem; font-weight: 800;">📍 Live Queue Status</h1>
+          <div id="queueLastUpdated" style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+            <div class="live-indicator">
+              <div class="live-dot"></div>
+              Real-time updates from the mandi
+            </div>
+          </div>
+        </div>
+        <button id="refreshQueueBtn" class="btn btn-primary">🔄 Refresh</button>
+      </div>
+
+      <!-- QUEUE HERO — Your Token vs Current -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;" id="queueHeroGrid">
+
+        <!-- YOUR TOKEN -->
+        <div class="queue-hero-card" id="myTokenCard">
+          <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; color: var(--green); margin-bottom: 0.5rem;">MY TOKEN</div>
+          <div class="queue-token-display" id="qStatMyToken">--</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;" id="qStatMyCentre">No active booking</div>
+        </div>
+
+        <!-- CURRENTLY SERVING -->
+        <div class="card" style="text-align: center; border-color: var(--amber-200); background: var(--amber-50);">
+          <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; color: var(--amber); margin-bottom: 0.5rem;">NOW SERVING</div>
+          <div class="queue-serving-display" id="qStatCurrentToken">--</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;" id="qStatCurrentStage">Current token</div>
+        </div>
+
+      </div>
+
+      <!-- FARMERS AHEAD + WAIT + STATUS -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+
+        <!-- People Ahead -->
+        <div class="stat-card" style="text-align: center;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 0.35rem;">Farmers Ahead</div>
+          <div id="qStatPeopleAhead" style="font-size: 2.5rem; font-weight: 900; color: var(--text); line-height: 1;">0</div>
+          <div id="qStatEstWait" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">Estimated wait</div>
+        </div>
+
+        <!-- Status -->
+        <div class="stat-card" style="text-align: center;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 0.35rem;">My Status</div>
+          <div id="qStatStatusBadge" style="margin: 0.5rem 0;">
+            <span class="badge badge-neutral">No Booking</span>
+          </div>
+          <div id="qStatStatusNote" style="font-size: 0.8rem; color: var(--text-muted);">Today's queue</div>
+        </div>
+
+        <!-- Progress -->
+        <div class="stat-card">
+          <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 0.6rem;">Queue Progress</div>
+          <div class="queue-progress-wrap" style="margin: 0;">
+            <div class="queue-progress-label">
+              <span>Start</span>
+              <span id="qProgressPct">0%</span>
+            </div>
+            <div class="queue-progress-bar">
+              <div class="queue-progress-fill" id="qProgressFill" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;" id="qProgressLabel">Complete 0 of 0</div>
+        </div>
+
+      </div>
+
+      <!-- QUEUE ALERT (approach notification) -->
+      <div id="farmerQueueAlertBox" style="margin-bottom: 1.5rem;"></div>
+
+      <!-- TOKEN CHAIN VISUALIZATION -->
+      <div class="card mb-6" id="tokenChainCard">
+        <div class="card-header">
+          <h2 class="card-title" style="font-size: 0.95rem;">Queue Visualization</h2>
+          <span id="liveQueueCountBadge" class="badge badge-info">0 Tokens</span>
+        </div>
+        <div id="tokenChainContainer" class="token-chain" style="justify-content: flex-start; overflow-x: auto; flex-wrap: wrap; gap: 0.35rem; padding: 0.5rem 0;">
+          <div style="width:100%; text-align:center; color:var(--text-muted); font-size:0.875rem; padding: 1rem 0;">
+            Loading queue visualization...
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 0.75rem; font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap;">
+          <span><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--green-100); border:1px solid var(--green-200); vertical-align:middle; margin-right:4px;"></span>Done</span>
+          <span><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--amber); vertical-align:middle; margin-right:4px;"></span>Serving Now</span>
+          <span><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--green); vertical-align:middle; margin-right:4px;"></span>Your Token</span>
+          <span><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--slate-100); border:1px solid var(--slate-200); vertical-align:middle; margin-right:4px;"></span>Waiting</span>
+        </div>
+      </div>
+
+      <!-- FULL QUEUE TABLE -->
+      <div class="card">
+        <div class="flex-between flex-wrap gap-3 mb-4" style="border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
+          <div>
+            <h2 style="font-size: 1rem; margin: 0;">Today's Full Queue</h2>
+            <p style="margin: 0.15rem 0 0; color: var(--text-muted); font-size: 0.8rem;">Ordered by token number. Your row is highlighted.</p>
+          </div>
+          <span id="liveQueueCountBadge2" class="badge badge-info">0 Tokens</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table card-table-mobile">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Farmer</th>
+                <th>Crop</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="liveQueueListBody">
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                  <div class="spinner" style="margin: 0 auto 0.5rem;"></div>
+                  Loading queue...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty queue state -->
+        <div id="queueEmptyState" style="display: none;" class="empty-state">
+          <div class="empty-state-icon">📍</div>
+          <div class="empty-state-title">No farmers in queue today</div>
+          <p class="empty-state-desc">The queue is empty. Book a slot to get your token.</p>
+          <a href="book-slot.html" class="btn btn-primary">Book a Slot</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="farmer-dashboard.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">🏠</span><span>Home</span>
+      </a>
+      <a href="book-slot.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📅</span><span>Book</span>
+      </a>
+      <a href="farmer-dashboard.html#kissanAiCard" class="bottom-nav-item ai-btn">
+        <span class="bottom-nav-icon">🤖</span><span>Saathi</span>
+      </a>
+      <a href="queue.html" class="bottom-nav-item active">
+        <span class="bottom-nav-icon">📍</span><span>Queue</span>
+      </a>
+      <a href="procurement.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">💰</span><span>Pay</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Procure Smart Mandi</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/sms-client.js?v=20260919"></script>
+  <script src="js/queue.js"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+
+    // Enhanced queue visualization - renders token chain
+    function renderTokenChain(bookings, myToken) {
+      const container = document.getElementById('tokenChainContainer');
+      if (!container || !bookings || bookings.length === 0) return;
+
+      container.innerHTML = '';
+      const sortedBookings = [...bookings].sort((a, b) => {
+        const numA = parseInt((a.token || '').replace(/\D/g, '')) || 0;
+        const numB = parseInt((b.token || '').replace(/\D/g, '')) || 0;
+        return numA - numB;
+      });
+
+      sortedBookings.forEach(b => {
+        const token = b.token || '?';
+        const status = b.status || 'WAITING';
+        const isMe = myToken && token === myToken;
+        const serving = status === 'CALLED' || status === 'IN_PROGRESS';
+        const done = status === 'COMPLETED';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'token-bubble ' + (isMe ? 'mine' : done ? 'completed' : serving ? 'serving' : 'waiting');
+        bubble.title = token + ' – ' + status;
+
+        // Show short token
+        const short = token.replace('KSM-', '').replace('KMN-', '');
+        bubble.textContent = short.length > 5 ? short.slice(-3) : short;
+
+        if (isMe) {
+          bubble.title = '👉 Your Token: ' + token;
+        }
+
+        container.appendChild(bubble);
+      });
+
+      // Update progress
+      const total = sortedBookings.length;
+      const done = sortedBookings.filter(b => b.status === 'COMPLETED').length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      const fill = document.getElementById('qProgressFill');
+      const label = document.getElementById('qProgressLabel');
+      const pctEl = document.getElementById('qProgressPct');
+      if (fill) fill.style.width = pct + '%';
+      if (label) label.textContent = 'Completed ' + done + ' of ' + total;
+      if (pctEl) pctEl.textContent = pct + '%';
+
+      // Sync badge
+      const badge2 = document.getElementById('liveQueueCountBadge2');
+      if (badge2) badge2.textContent = total + ' Tokens';
+    }
+
+    // Hook into queue.js events
+    window._onQueueDataLoaded = renderTokenChain;
+  </script>
+</body>
+</html>

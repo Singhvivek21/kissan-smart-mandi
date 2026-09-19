@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" class="farmer-page">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procurement & Payment | KISSAN – Procure Smart Mandi</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="farmer-page">
+
+  <!-- Top Nav -->
+  <header class="site-header">
+    <div class="container nav-wrapper">
+      <a href="farmer-dashboard.html" class="brand-logo">
+        <div class="brand-icon">🌾</div>
+        <div>KISSAN <span class="brand-tagline">Farmer Portal</span></div>
+      </a>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">☰</button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="farmer-dashboard.html">Home</a></li>
+        <li><a href="book-slot.html">Book Slot</a></li>
+        <li><a href="my-booking.html">My Booking</a></li>
+        <li><a href="queue.html">Queue</a></li>
+        <li><a href="procurement.html" class="active">Procurement</a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="user-chip">
+          <div class="user-avatar-sm">F</div>
+          <span id="farmerNameDisplay">Farmer</span>
+        </div>
+        <button class="btn btn-secondary btn-sm btn-logout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container" style="padding: 1.5rem 1.25rem 4rem;">
+
+      <!-- Header -->
+      <div class="flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 style="font-size: 1.6rem; font-weight: 800;">⚖️ Procurement & Payment</h1>
+          <p style="color: var(--text-muted); margin-top: 0.25rem; font-size: 0.875rem;">
+            Your crop weighment records and payment status at MSP rates.
+          </p>
+        </div>
+        <a href="book-slot.html" class="btn btn-primary">+ Book Next Slot</a>
+      </div>
+
+      <!-- SUMMARY STATS -->
+      <div class="stats-grid mb-6" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+        <div class="stat-card">
+          <div class="stat-icon green">⚖️</div>
+          <div id="farmerTotalQuintals" class="stat-value">0 Qtl</div>
+          <div class="stat-label">Total Produce Sold</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">💰</div>
+          <div id="farmerTotalEarnings" class="stat-value">₹0</div>
+          <div class="stat-label">Total Payout</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">📋</div>
+          <div id="farmerTotalSlipsCount" class="stat-value">0</div>
+          <div class="stat-label">Completed Records</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">🏛️</div>
+          <div class="stat-value" style="font-size: 1.1rem; font-weight: 800;">MSP</div>
+          <div class="stat-label">Govt. Rate Guaranteed</div>
+        </div>
+      </div>
+
+      <!-- PROCUREMENT TIMELINE / STATUS (for active procurement) -->
+      <div class="card mb-6" id="procurementTimelineCard">
+        <div class="card-header">
+          <h2 class="card-title">Procurement Journey</h2>
+          <span class="badge badge-info" id="procActiveStatusBadge">–</span>
+        </div>
+
+        <!-- Journey stages -->
+        <div class="proc-timeline" id="procJourneyTimeline">
+          <div class="proc-stage done">
+            <div class="proc-stage-dot">✓</div>
+            <div class="proc-stage-content">
+              <div class="proc-stage-title">✅ Slot Booked</div>
+              <div class="proc-stage-meta">Booking confirmed and token issued</div>
+            </div>
+          </div>
+          <div class="proc-stage" id="pStageArrived">
+            <div class="proc-stage-dot">2</div>
+            <div class="proc-stage-content">
+              <div class="proc-stage-title">Arrived at Mandi</div>
+              <div class="proc-stage-meta" id="pStageArrivedMeta">Waiting for your token to be called</div>
+            </div>
+          </div>
+          <div class="proc-stage" id="pStageWeighing">
+            <div class="proc-stage-dot">3</div>
+            <div class="proc-stage-content">
+              <div class="proc-stage-title">Weighing & Quality Check</div>
+              <div class="proc-stage-meta" id="pStageWeighingMeta">Crop weighed at the weighbridge</div>
+            </div>
+          </div>
+          <div class="proc-stage" id="pStageProcured">
+            <div class="proc-stage-dot">4</div>
+            <div class="proc-stage-content">
+              <div class="proc-stage-title">Procurement Completed</div>
+              <div class="proc-stage-meta" id="pStageProcuredMeta">Form J receipt generated</div>
+            </div>
+          </div>
+          <div class="proc-stage" id="pStagePayInit">
+            <div class="proc-stage-dot">5</div>
+            <div class="proc-stage-content">
+              <div class="proc-stage-title">Payment Initiated</div>
+              <div class="proc-stage-meta" id="pStagePayInitMeta">DBT transfer initiated to your bank account</div>
+            </div>
+          </div>
+          <div class="proc-stage" id="pStagePaid">
+            <div class="proc-stage-dot">6</div>
+            <div class="proc-stage-content">
+              <div class="proc-stage-title">Payment Received</div>
+              <div class="proc-stage-meta" id="pStagePaidMeta">Amount credited to your bank account via DBT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROCUREMENT RECORDS -->
+      <div class="card">
+        <div class="flex-between flex-wrap gap-3 mb-4" style="border-bottom: 1px solid var(--border); padding-bottom: 0.85rem;">
+          <div>
+            <h2 style="font-size: 1rem; margin: 0;">Procurement Records</h2>
+            <p style="margin: 0.15rem 0 0; color: var(--text-muted); font-size: 0.8rem;">Your crop weighment and payment history.</p>
+          </div>
+          <span id="farmerProcCountBadge" class="badge badge-info">0 Records</span>
+        </div>
+
+        <!-- Mobile: cards, Desktop: table -->
+        <div id="procurementCardsContainer" style="display:none;">
+          <!-- Mobile card view injected here -->
+        </div>
+
+        <div class="table-responsive" id="procurementTableContainer">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Receipt</th>
+                <th>Crop</th>
+                <th>Quantity</th>
+                <th>Quality</th>
+                <th>Amount</th>
+                <th>Procurement</th>
+                <th>Payment</th>
+                <th>Txn ID</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="procurementHistoryTableBody">
+              <tr>
+                <td colspan="9" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                  <div class="spinner" style="margin: 0 auto 0.75rem;"></div>
+                  Loading records...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty state for new farmer -->
+        <div id="procEmptyState" style="display:none;" class="empty-state" style="border: none;">
+          <div class="empty-state-icon">⚖️</div>
+          <div class="empty-state-title">No Procurement Records Yet</div>
+          <p class="empty-state-desc">
+            Your weighment and payment records will appear here after your first mandi visit.
+          </p>
+          <a href="book-slot.html" class="btn btn-primary">Book Your First Slot</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Receipt Modal -->
+  <div class="modal-overlay" id="jFormReceiptModal">
+    <div class="modal-dialog" style="max-width: 640px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, var(--green-dark), #166534); border-radius: 12px 12px 0 0;">
+        <h3 style="margin: 0; color: white;">📋 Procurement Receipt (Form J)</h3>
+        <button onclick="closeModal('jFormReceiptModal')" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 1.25rem; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 4px; line-height: 1;">✕</button>
+      </div>
+      <div class="modal-body" id="jFormModalContent"></div>
+      <div class="modal-footer">
+        <button onclick="window.print()" class="btn btn-primary">🖨️ Print Receipt</button>
+        <button onclick="closeModal('jFormReceiptModal')" class="btn btn-secondary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <a href="farmer-dashboard.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">🏠</span><span>Home</span>
+      </a>
+      <a href="book-slot.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📅</span><span>Book</span>
+      </a>
+      <a href="farmer-dashboard.html#kissanAiCard" class="bottom-nav-item ai-btn">
+        <span class="bottom-nav-icon">🤖</span><span>Saathi</span>
+      </a>
+      <a href="queue.html" class="bottom-nav-item">
+        <span class="bottom-nav-icon">📍</span><span>Queue</span>
+      </a>
+      <a href="procurement.html" class="bottom-nav-item active">
+        <span class="bottom-nav-icon">💰</span><span>Pay</span>
+      </a>
+    </div>
+  </nav>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom">
+      <p>© 2026 KISSAN – Procure Smart Mandi</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/qrcode-lib.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/procurement.js"></script>
+  <script>
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.toggle('active');
+    });
+  </script>
+</body>
+</html>

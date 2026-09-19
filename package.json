@@ -1,0 +1,26 @@
+{
+  "name": "kissan-smart-mandi",
+  "version": "2.0.0",
+  "description": "KISSAN — Procure Smart Mandi: Digital Public Infrastructure for Farmers (Smart India Hackathon #26032)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test-sms-service.js && node test-procurement-payment.js && node test-booking-integration.js",
+    "test:sms": "node test-sms-service.js",
+    "test:procurement": "node test-procurement-payment.js",
+    "test:booking": "node test-booking-integration.js"
+  },
+  "keywords": [
+    "sih2026",
+    "smart-india-hackathon",
+    "agriculture",
+    "apmc",
+    "mandi",
+    "queue-management",
+    "digital-india",
+    "gemini-ai",
+    "dbt-payments"
+  ],
+  "author": "Vivek Kumar Singh",
+  "license": "MIT"
+}
