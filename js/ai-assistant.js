@@ -115,7 +115,7 @@ function initKissanAiAssistant() {
         btn.type = 'button';
         btn.className = 'ai-suggested-btn';
         btn.setAttribute('data-question', item.q);
-        btn.textContent = `${item.label} (${item.q.length > 25 ? item.q.substring(0, 22) + '...' : item.q})`;
+        btn.textContent = item.label;
         btn.addEventListener('click', () => {
           if (sendBtn && sendBtn.disabled) return;
           processQuestion(item.q);
@@ -143,9 +143,9 @@ function initKissanAiAssistant() {
     }
   }
 
-  // Load language preference
+  // Load language preference (default to Hindi 'hi-IN' for Indian farmers)
   if (langSelect) {
-    const savedLang = localStorage.getItem('kissan_ai_lang') || 'en-IN';
+    const savedLang = localStorage.getItem('kissan_ai_lang') || langSelect.value || 'hi-IN';
     langSelect.value = savedLang;
     applyLanguage(savedLang);
     langSelect.addEventListener('change', () => {
@@ -1349,16 +1349,20 @@ Strict Rules:
  * Directly executes the 8 authoritative tools with 100% database accuracy.
  */
 async function executeLocalMandiAssistant(query) {
-  const q = (query || '').toLowerCase().trim();
+  const rawQ = (query || '').trim();
+  const q = rawQ.toLowerCase();
   const lang = window.KissanAI.selectedLang || 'hi-IN';
-  const isHindi = lang === 'hi-IN' || /[\u0900-\u097F]/.test(query) || q.includes('mera') || q.includes('meri') || q.includes('bhav');
-  const isPunjabi = lang === 'pa-IN' || /[\u0A00-\u0A7F]/.test(query);
+  const isHindi = lang === 'hi-IN' || /[\u0900-\u097F]/.test(rawQ) || q.includes('mera') || q.includes('meri') || q.includes('bhav') || q.includes('kya');
+  const isPunjabi = lang === 'pa-IN' || /[\u0A00-\u0A7F]/.test(rawQ);
   const farmer = getAuthenticatedFarmer();
 
+  // Helper regex tests
+  const matches = (regex) => regex.test(rawQ) || regex.test(q);
+
   // 1. Greetings & Conversational
-  if (/^(hi|hello|hey|namaste|pranam|ram ram|sat sri akal|good morning|good evening|kaise ho)\b/i.test(q)) {
+  if (matches(/^(hi|hello|hey|namaste|namaskar|pranam|ram ram|sat sri akal|good morning|good evening|kaise ho|नमस्ते|नमस्कार|प्रणाम|राम राम|सत श्री अकाल|हेलो|हाय|कैसे हो|जय जवान|जय किसान)\b/i) || matches(/^(नमस्ते|नमस्कार|प्रणाम|राम राम|सत श्री अकाल)/)) {
     if (isHindi) {
-      return `नमस्ते ${farmer.name} जी! मैं आपका KISSAN डिजिटल मंडी सहायक हूँ। मैं आपकी क्या सेवा कर सकता हूँ?\n\n💡 सुझाए गए अगले प्रश्न:\n• मेरी सक्रिय बुकिंग और टोकन क्या है?\n• मंडी कतार में मेरा क्या नंबर है?\n• गेहूं और सरसों का सरकारी MSP क्या है?`;
+      return `नमस्ते ${farmer.name} जी! मैं आपका KISSAN डिजिटल मंडी सहायक हूँ।\nआप मुझसे अपनी स्लॉट बुकिंग, लाइव यार्ड कतार, फसल खरीद वजन, DBT बैंक भुगतान, आधिकारिक MSP भाव, फसल रोग पहचान या कृषि योजनाओं के बारे में पूछ सकते हैं।\n\n💡 सुझाए गए अगले प्रश्न:\n• मेरी सक्रिय बुकिंग और टोकन क्या है?\n• मंडी कतार में मेरा क्या नंबर है?\n• गेहूं और सरसों का सरकारी MSP क्या है?`;
     } else if (isPunjabi) {
       return `ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ${farmer.name} ਜੀ! ਮੈਂ ਤੁਹਾਡਾ KISSAN ਮੰਡੀ ਸਹਾਇਕ ਹਾਂ। ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?\n\n💡 ਸੁਝਾਏ ਗਏ ਅਗਲੇ ਸਵਾਲ:\n• ਮੇਰੀ ਬੁਕਿੰਗ ਦੀ ਸਥਿਤੀ ਕੀ ਹੈ?\n• ਕਤਾਰ ਵਿੱਚ ਮੇਰਾ ਨੰਬਰ ਕੀ ਹੈ?`;
     }
@@ -1366,16 +1370,16 @@ async function executeLocalMandiAssistant(query) {
   }
 
   // 2. Cancellation query
-  if (q.includes('cancel') || q.includes('rad') || q.includes('radd')) {
+  if (matches(/(cancel|cancellation|rad|radd|hatao|band|रद्द|कैंसिल|कैंसल|निरस्त|हटाना|कटवाना|ਰੱਦ|ਕੈਂਸਲ)/i)) {
     let targetCrop = '';
-    if (q.includes('cotton') || q.includes('kapas')) targetCrop = 'cotton';
-    else if (q.includes('gram') || q.includes('chana')) targetCrop = 'gram';
-    else if (q.includes('mustard') || q.includes('sarson')) targetCrop = 'mustard';
-    else if (q.includes('wheat') || q.includes('gehu')) targetCrop = 'wheat';
-    else if (q.includes('paddy') || q.includes('dhan') || q.includes('rice')) targetCrop = 'paddy';
-    else if (q.includes('maize') || q.includes('makka')) targetCrop = 'maize';
+    if (matches(/(cotton|kapas|कपास|नरमा|ਕਪਾਹ)/i)) targetCrop = 'cotton';
+    else if (matches(/(gram|chana|चना|छोले|ਛੋਲੇ)/i)) targetCrop = 'gram';
+    else if (matches(/(mustard|sarson|सरसों|राई|ਸਰ੍ਹੋਂ)/i)) targetCrop = 'mustard';
+    else if (matches(/(wheat|gehu|gehun|गेहूं|गेहूँ|कनक|ਕਣਕ)/i)) targetCrop = 'wheat';
+    else if (matches(/(paddy|dhan|rice|धान|चावल|जीरी|ਝੋਨਾ)/i)) targetCrop = 'paddy';
+    else if (matches(/(maize|makka|मक्का|मक्की|ਮੱਕੀ)/i)) targetCrop = 'maize';
 
-    const tokenMatch = q.match(/kmn[-\s]?\d+/i);
+    const tokenMatch = rawQ.match(/kmn[-\s]?\d+/i);
     const filter = targetCrop ? { crop: targetCrop } : (tokenMatch ? { token_number: tokenMatch[0].toUpperCase().replace(/\s+/, '-') } : null);
 
     const res = tool_confirm_cancel_booking(filter);
@@ -1391,67 +1395,68 @@ async function executeLocalMandiAssistant(query) {
       : `Cancellation confirmation required for Token ${res.token_number} (${res.crop}). Please confirm your selection in the prompt box below.`;
   }
 
-  // 3. Booking query
-  if (q.includes('booking') || q.includes('token') || q.includes('pass') || q.includes('gate pass') || q.includes('slot status')) {
+  // 3. Booking / Token / Gate Pass query
+  if (matches(/(booking|book|token|pass|gate pass|slot|मेरी बुकिंग|बुकिंग|टोकन|पर्ची|गेट पास|पास|स्लॉट|अपॉइंटमेंट|तारीख|समय|ਬੁਕਿੰਗ|ਟੋਕਨ|ਪਾਸ|ਗੇਟ ਪਾਸ)/i)) {
     let targetCrop = '';
-    if (q.includes('cotton') || q.includes('kapas')) targetCrop = 'cotton';
-    else if (q.includes('gram') || q.includes('chana')) targetCrop = 'gram';
-    else if (q.includes('mustard') || q.includes('sarson')) targetCrop = 'mustard';
-    else if (q.includes('wheat') || q.includes('gehu')) targetCrop = 'wheat';
-    else if (q.includes('paddy') || q.includes('dhan') || q.includes('rice')) targetCrop = 'paddy';
+    if (matches(/(cotton|kapas|कपास|नरमा|ਕਪਾਹ)/i)) targetCrop = 'cotton';
+    else if (matches(/(gram|chana|चना|छोले|ਛੋਲੇ)/i)) targetCrop = 'gram';
+    else if (matches(/(mustard|sarson|सरसों|राई|ਸਰ੍ਹੋਂ)/i)) targetCrop = 'mustard';
+    else if (matches(/(wheat|gehu|gehun|गेहूं|गेहूँ|कनक|ਕਣਕ)/i)) targetCrop = 'wheat';
+    else if (matches(/(paddy|dhan|rice|धान|चावल|जीरी|ਝੋਨਾ)/i)) targetCrop = 'paddy';
+    else if (matches(/(maize|makka|मक्का|मक्की|ਮੱਕੀ)/i)) targetCrop = 'maize';
 
-    const tokenMatch = q.match(/kmn[-\s]?\d+/i);
+    const tokenMatch = rawQ.match(/kmn[-\s]?\d+/i);
     const filter = targetCrop ? { crop: targetCrop } : (tokenMatch ? { token_number: tokenMatch[0].toUpperCase().replace(/\s+/, '-') } : null);
 
     const data = tool_get_my_booking(filter);
     return formatToolOutputFallback('get_my_booking', data, lang);
   }
 
-  // 4. Queue query
-  if (q.includes('queue') || q.includes('katar') || q.includes('line') || q.includes('wait') || q.includes('stage') || q.includes('bay') || q.includes('kab aayega') || q.includes('when')) {
+  // 4. Queue / Line / Waiting query
+  if (matches(/(queue|katar|line|wait|waiting|stage|bay|kab aayega|when|ahead|कतार|लाइन|वेटिंग|इंतजार|इन्तजार|प्रतीक्षा|नंबर|नम्बर|बारी|कितना समय|कब आएगा|कितने किसान|कितने वाहन|कितने आगे|यार्ड|ਕਤਾਰ|ਲਾਈਨ|ਉਡੀਕ|ਨੰਬਰ|ਵਾਰੀ)/i)) {
     const data = tool_get_my_queue_status();
     return formatToolOutputFallback('get_my_queue_status', data, lang);
   }
 
-  // 5. Procurement query
-  if (q.includes('procurement') || q.includes('kharid') || q.includes('weigh') || q.includes('taul') || q.includes('vajan') || q.includes('weight') || q.includes('slip')) {
+  // 5. Procurement / Weighment / Form J query
+  if (matches(/(procurement|kharid|weigh|weighment|taul|tulayi|vajan|weight|slip|receipt|scale|j form|form j|खरीद|तौल|तुलाई|वजन|वज़न|कांटा|काँटा|रसीद|जे फार्म|फॉर्म जे|नमी|तुलाई|गुणवत्ता|क्वालिटी|ਖਰੀਦ|ਤੋਲ|ਵਜ਼ਨ|ਪਰਚੀ|ਜੇ ਫਾਰਮ)/i)) {
     const data = tool_get_my_procurement();
     return formatToolOutputFallback('get_my_procurement', data, lang);
   }
 
-  // 6. Payment / DBT query
-  if (q.includes('payment') || q.includes('dbt') || q.includes('paise') || q.includes('bank') || q.includes('khata') || q.includes('money') || q.includes('account')) {
+  // 6. Payment / DBT / Bank query
+  if (matches(/(payment|dbt|paise|paisa|rupaye|rupees|bank|khata|money|account|credit|transfer|भुगतान|पैसे|रुपये|रुपए|खाता|बैंक|डीबीटी|क्रेडिट|जमा|पैसे कब|पैसा|खाते में|कब आएंगे|कब मिलेंगे|ਭੁਗਤਾਨ|ਪੈਸੇ|ਰੁਪਏ|ਖਾਤਾ|ਬੈਂਕ|ਡੀਬੀਟੀ)/i)) {
     const data = tool_get_my_payment_status();
     return formatToolOutputFallback('get_my_payment_status', data, lang);
   }
 
-  // 7. Slots query
-  if (q.includes('available slot') || q.includes('timing') || q.includes('shift') || q.includes('samay') || q.includes('available') || q.includes('khali')) {
+  // 7. Slots availability / Timings query
+  if (matches(/(available slot|timing|shift|samay|available|khali|free slot|open|hours|स्लॉट उपलब्ध|खाली स्लॉट|समय|शिफ्ट|मंडी का समय|कब खुलती है|कब खुलेगी|बुकिंग के लिए समय|उपलब्ध|ਸਲਾਟ ਉਪਲਬਧ|ਸਮਾਂ)/i)) {
     const data = tool_get_available_slots();
     return formatToolOutputFallback('get_available_slots', data, lang);
   }
 
-  // 8. MSP query
-  if (q.includes('msp') || q.includes('rate') || q.includes('price') || q.includes('bhav') || q.includes('wheat') || q.includes('gehu') || q.includes('mustard') || q.includes('sarson') || q.includes('paddy') || q.includes('dhan')) {
+  // 8. MSP / Rate / Price / Bhav query
+  if (matches(/(msp|rate|price|bhav|bhaav|cost|एमएसपी|भाव|दर|दाम|कीमत|सरकारी भाव|रेट|ਸਰਕਾਰੀ ਮੁੱਲ|ਭਾਅ|ਰੇਟ)/i) || matches(/(wheat|gehu|mustard|sarson|paddy|dhan|gram|chana|cotton|kapas|maize|makka|गेहूं|गेहूँ|सरसों|धान|चावल|चना|कपास|मक्का|सोयाबीन|मूंग|ਕਣਕ|ਸਰ੍ਹੋਂ|ਝੋਨਾ)/i)) {
     let crop = '';
-    if (q.includes('wheat') || q.includes('gehu')) crop = 'wheat';
-    else if (q.includes('mustard') || q.includes('sarson')) crop = 'mustard';
-    else if (q.includes('paddy') || q.includes('dhan')) crop = 'paddy';
-    else if (q.includes('gram') || q.includes('chana')) crop = 'gram';
-    else if (q.includes('cotton') || q.includes('kapas')) crop = 'cotton';
-    else if (q.includes('maize') || q.includes('makka')) crop = 'maize';
+    if (matches(/(wheat|gehu|gehun|गेहूं|गेहूँ|ਕਣਕ)/i)) crop = 'wheat';
+    else if (matches(/(mustard|sarson|सरसों|राई|ਸਰ੍ਹੋਂ)/i)) crop = 'mustard';
+    else if (matches(/(paddy|dhan|rice|धान|चावल|ਝੋਨਾ)/i)) crop = 'paddy';
+    else if (matches(/(gram|chana|चना|ਛੋਲੇ)/i)) crop = 'gram';
+    else if (matches(/(cotton|kapas|कपास|ਕਪਾਹ)/i)) crop = 'cotton';
+    else if (matches(/(maize|makka|मक्का|ਮੱਕੀ)/i)) crop = 'maize';
     const data = tool_get_official_msp(crop);
     return formatToolOutputFallback('get_official_msp', data, lang);
   }
 
-  // 9. Documents / Rules
-  if (q.includes('document') || q.includes('dastavej') || q.includes('kagaz') || q.includes('paper') || q.includes('rule') || q.includes('helpline') || q.includes('gate entry')) {
+  // 9. Documents / Rules query
+  if (matches(/(document|documents|dastavej|kagaz|paper|rule|rules|helpline|gate entry|bring|id proof|aadhaar|दस्तावेज|दस्तावेज़|कागजात|कागज|नियम|आईडी|आधार|हेल्पलाइन|मंडी में क्या चाहिए|गेट पर|पहचान पत्र|जरूरी कागज|ਦਸਤਾਵੇਜ਼|ਕਾਗਜ਼|ਨਿਯਮ)/i)) {
     const data = tool_get_mandi_rules();
     return formatToolOutputFallback('get_mandi_rules', data, lang);
   }
 
   // 10. Crop Health / Disease / Pest diagnosis
-  if (q.includes('disease') || q.includes('pest') || q.includes('keet') || q.includes('rog') || q.includes('rust') || q.includes('fungus') || q.includes('aphid') || q.includes('blight') || q.includes('spray')) {
+  if (matches(/(disease|pest|pests|keet|rog|rust|fungus|aphid|aphids|blight|spray|medicine|treatment|dawa|ilaj|chepa|mahu|keeda|sundhi|peela ratua|रोग|बीमारी|कीट|कीड़ा|कीड़े|कीड़े|चेपा|माहू|रतुआ|पीला रतुआ|फफूंद|फंगस|झुलसा|उकठा|सफेद धब्बा|दवा|स्प्रे|छिड़काव|इलाज|रोकथाम|पत्तियां|पत्ते|ਸਪਰੇਅ|ਬਿਮਾਰੀ|ਕੀੜਾ)/i)) {
     if (isHindi) {
       return `फसल रोग एवं कीट नियंत्रण मार्गदर्शन (${farmer.district} क्षेत्र):\n\n1. पत्तियों का निरीक्षण: यदि पत्तियों पर सफेद चूर्ण या धब्बे दिखें तो यह White Rust या Alternaria Blight हो सकता है। मैन्कोजेब 75 WP (2 ग्राम/लीटर पानी) का छिड़काव करें।\n2. चेपा (Aphids) कीट: यदि छोटे हरे/काले कीट रस चूस रहे हों, तो नीम तेल (10,000 ppm @ 3 ml/L) या डायमेथोएट 30 EC का छिड़काव करें।\n3. गेहूं में पीला रतुआ (Yellow Rust): पत्तियों पर पीली धारियां दिखने पर प्रोपिकोनाजोल 25 EC (1 मिली/लीटर) छिड़कें।\n\n💡 सुझाए गए अगले प्रश्न:\n• सरसों में चेपा कीट की रोकथाम के उपाय क्या हैं?\n• करनाल मंडी में सरसों के लिए अधिकतम स्वीकार्य नमी क्या है?\n• मेरी सक्रिय बुकिंग टोकन KMN-042 का क्या विवरण है?`;
     }
@@ -1459,7 +1464,7 @@ async function executeLocalMandiAssistant(query) {
   }
 
   // 11. Fertilizer & Soil queries
-  if (q.includes('fertilizer') || q.includes('urea') || q.includes('dap') || q.includes('npk') || q.includes('khad') || q.includes('soil')) {
+  if (matches(/(fertilizer|fertilizers|urea|dap|npk|khad|soil|mitti|poshan|sulfur|potash|zinc|उर्वरक|खाद|यूरिया|डीएपी|पोटाश|सल्फर|जिंक|मिट्टी|पोषण|खाद कब डालें|ਖਾਦ|ਯੂਰੀਆ|ਡੀਏਪੀ)/i)) {
     if (isHindi) {
       return `उर्वरक एवं पोषक तत्व सलाह:\n• सरसों: बुवाई के समय 40 किग्रा डीएपी + 20 किग्रा पोटाश + 25 किग्रा बेंटोनाइट सल्फर प्रति एकड़ दें। पहली सिंचाई पर 35 किग्रा यूरिया का टॉप ड्रेसिंग करें।\n• गेहूं: 50 किग्रा डीएपी + 50 किग्रा यूरिया दो भागों में (CRI अवस्था व कल्ले फूटते समय)।\n\n💡 सुझाए गए अगले प्रश्न:\n• सल्फर का प्रयोग सरसों में क्यों जरूरी है?\n• मेरी मंडी बुकिंग का समय क्या है?`;
     }
@@ -1467,15 +1472,29 @@ async function executeLocalMandiAssistant(query) {
   }
 
   // 12. Government Schemes (PM-Kisan, KCC, etc.)
-  if (q.includes('scheme') || q.includes('yojana') || q.includes('pm kisan') || q.includes('pm-kisan') || q.includes('kcc') || q.includes('fasal bima') || q.includes('pmfby')) {
+  if (matches(/(scheme|schemes|yojana|yojna|pm kisan|pm-kisan|kcc|fasal bima|pmfby|subsidy|loan|rin|योजना|योजनाएं|पीएम किसान|सम्मान निधि|केसीसी|किसान क्रेडिट कार्ड|फसल बीमा|बीमा|सब्सिडी|ऋण|ਯੋਜਨਾ|ਪੀਐਮ ਕਿਸਾਨ)/i)) {
     if (isHindi) {
       return `सरकारी किसान योजनाएं (Government Schemes):\n• PM-KISAN: प्रतिवर्ष ₹6,000 की वित्तीय सहायता (₹2,000 की 3 किस्तों में सीधे बैंक खाते/DBT में)।\n• किसान क्रेडिट कार्ड (KCC): 4% रियायती ब्याज दर पर कृषि ऋण।\n• पीएम फसल बीमा योजना (PMFBY): रबी फसलों पर 1.5% व खरीफ पर 2% प्रीमियम पर फसल नुकसान की भरपाई।\n\n💡 सुझाए गए अगले प्रश्न:\n• मेरा हालिया DBT भुगतान कब हुआ था?\n• मंडी में आवश्यक दस्तावेजों की सूची क्या है?`;
     }
     return `Government Agricultural Schemes:\n• PM-KISAN: Direct income support of ₹6,000/year in 3 equal installments into your Aadhaar-linked bank account.\n• Kisan Credit Card (KCC): Concessional crop loans at 4% effective interest rate.\n• PMFBY (Crop Insurance): Low premium (1.5% Rabi / 2% Kharif) comprehensive crop coverage against natural perils.\n\n💡 Recommended Follow-up Questions:\n• What was the amount of my latest Mandi DBT payment?\n• What documents are mandatory for entry at the Mandi gate?`;
   }
 
-  // 13. General / Conversational fallback with helpful guidance
+  // 13. Weather & Irrigation queries
+  if (matches(/(weather|mausam|rain|barish|irrigation|sinchai|paani|मौसम|बारिश|वर्षा|पानी|सिंचाई|तापमान|ਧੁੱਪ|ਮੀਂਹ|ਮੌਸਮ)/i)) {
+    if (isHindi) {
+      return `मौसम एवं सिंचाई सलाह (${farmer.district} क्षेत्र):\n• वर्तमान मौसम: शुष्क एवं अनुकूल तापमान (24°C - 31°C)।\n• सिंचाई सलाह: यदि सरसों में फूल आने की अवस्था है तो हल्की सिंचाई करें, तेज हवा के समय सिंचाई से बचें ताकि फसल गिरे नहीं।\n\n💡 सुझाए गए अगले प्रश्न:\n• मेरी सक्रिय मंडी बुकिंग का समय क्या है?\n• गेहूं में सिंचाई की सही अवस्थाएं कौन सी हैं?`;
+    }
+    return `Weather & Irrigation Advisory (${farmer.district} Region):\n• Current conditions: Clear skies, moderate temperature suitable for rabi harvesting and procurement.\n• Irrigation Tip: Avoid irrigation during high wind speeds to prevent crop lodging.\n\n💡 Recommended Follow-up Questions:\n• What is my booking status at Karnal Mandi?`;
+  }
+
+  // 14. Contextual Fallback (Checks live status to give dynamic answer, NEVER the same stuck text!)
+  const myBooking = tool_get_my_booking();
+  const myQueue = tool_get_my_queue_status();
+  
   if (isHindi) {
+    if (myBooking.found) {
+      return `रामेश्वर सिंह जी, आपका सवाल प्राप्त हुआ।\nआपकी सक्रिय मंडी बुकिंग का विवरण: टोकन **${myBooking.token_number}** (${myBooking.crop} - ~${myBooking.quantity_quintals} क्विंटल)।\nमंडी कतार की स्थिति: वर्तमान में टोकन **${myQueue.current_serving_token}** की जांच चल रही है और आपसे आगे **${myQueue.tokens_ahead} वाहन** हैं।\n\nआप मुझसे बेझिझक किसी भी विषय (MSP भाव, तौल रसीद, DBT भुगतान, खाद-बीज या फसल रोग) पर पूछ सकते हैं।\n\n💡 सुझाए गए अगले प्रश्न:\n• मेरी बुकिंग और टोकन नंबर क्या है?\n• मंडी कतार में मेरा क्या नंबर है?\n• गेहूं और सरसों का सरकारी MSP क्या है?\n• फसल में कीड़ा या रोग का इलाज क्या है?`;
+    }
     return `नमस्ते ${farmer.name} जी! मैं आपकी बात समझ रहा हूँ। मैं आपका आधिकारिक KISSAN मंडी एवं कृषि सलाहकार हूँ।\nआप मुझसे बेझिझक अपनी स्लॉट बुकिंग, लाइव यार्ड कतार, फसल खरीद वजन, DBT बैंक भुगतान, आधिकारिक MSP भाव, फसल रोग पहचान या कृषि योजनाओं के बारे में पूछ सकते हैं।\n\n💡 सुझाए गए अगले प्रश्न:\n• मेरी बुकिंग और टोकन नंबर क्या है?\n• मंडी कतार में मेरा क्या नंबर है और कितना समय लगेगा?\n• सरसों और गेहूं का आधिकारिक MSP भाव क्या है?\n• फसल में कीट व रोग की पहचान कैसे करें?`;
   } else if (isPunjabi) {
     return `ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ${farmer.name} ਜੀ! ਮੈਂ ਤੁਹਾਡਾ KISSAN ਮੰਡੀ ਸਹਾਇਕ ਹਾਂ।\nਤੁਸੀਂ ਆਪਣੀ ਬੁਕਿੰਗ, ਕਤਾਰ, ਖਰੀਦ ਤੋਲ, DBT ਬੈਂਕ ਭੁਗਤਾਨ, ਸਰਕਾਰੀ MSP ਜਾਂ ਫਸਲ ਸਲਾਹ ਬਾਰੇ ਪੁੱਛ ਸਕਦੇ ਹੋ।\n\n💡 ਸੁਝਾਏ ਗਏ ਅਗਲੇ ਸਵਾਲ:\n• ਮੇਰੀ ਬੁਕਿੰਗ ਦੀ ਸਥਿਤੀ ਕੀ ਹੈ?\n• ਕਤਾਰ ਵਿੱਚ ਮੇਰਾ ਨੰਬਰ ਕੀ ਹੈ?`;
